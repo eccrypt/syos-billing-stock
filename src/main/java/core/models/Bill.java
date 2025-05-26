@@ -1,0 +1,32 @@
+package core.models;
+
+import java.util.Date;
+import java.util.List;
+
+public class Bill {
+    private int id;
+    private Date billDate;
+    private double total;
+    private double discount;
+    private double cashTendered;
+    private double changeDue;
+    private List<BillItem> items;
+
+    public Bill(int id, Date billDate, double total, double discount, double cashTendered, double changeDue, List<BillItem> items) {
+        this.id = id;
+        this.billDate = billDate;
+        this.total = total;
+        this.discount = discount;
+        this.cashTendered = cashTendered;
+        this.changeDue = changeDue;
+        this.items = items;
+    }
+
+    public int getId() { return id; }
+    public Date getBillDate() { return billDate; }
+    public double getTotal() { return total; }
+    public double getDiscount() { return discount; }
+    public double getCashTendered() { return cashTendered; }
+    public double getChangeDue() { return changeDue; }
+    public List<BillItem> getItems() { return items; }
+}
