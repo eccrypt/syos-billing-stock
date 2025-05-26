@@ -1,1 +1,0 @@
-<html><body><h1>SYOS Web App</h1></body></html>
