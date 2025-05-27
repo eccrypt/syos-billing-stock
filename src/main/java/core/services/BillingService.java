@@ -1,9 +1,10 @@
 package core.services;
 
+import core.billing.BillBuilder;
+import core.billing.Bill;
 import core.dao.BillDAO;
 import core.dao.BillItemDAO;
 import core.dao.ItemDAO;
-import core.models.Bill;
 import core.models.BillItem;
 import core.models.Item;
 
@@ -24,13 +25,10 @@ public class BillingService {
 
     public double calculateTotal(Map<String, Integer> purchasedItems) throws SQLException {
         double total = 0;
-
         for (Map.Entry<String, Integer> entry : purchasedItems.entrySet()) {
             Item item = itemDAO.getItemByCode(entry.getKey());
-            int quantity = entry.getValue();
-            total += item.getPrice() * quantity;
+            total += item.getPrice() * entry.getValue();
         }
-
         return total;
     }
 
@@ -38,20 +36,29 @@ public class BillingService {
         List<BillItem> billItems = new ArrayList<>();
         double total = 0;
 
+        // Prepare BillItems and calculate total
         for (Map.Entry<String, Integer> entry : purchasedItems.entrySet()) {
             Item item = itemDAO.getItemByCode(entry.getKey());
             int quantity = entry.getValue();
-            double price = item.getPrice() * quantity;
-            total += price;
-            billItems.add(new BillItem(item.getCode(), item.getName(), quantity, price));
+            double itemTotal = item.getPrice() * quantity;
+            total += itemTotal;
+
+            billItems.add(new BillItem(item.getCode(), item.getName(), quantity, itemTotal));
             itemDAO.updateItemQuantity(item.getCode(), quantity);
         }
 
+        // Final amounts
         double netTotal = total - discount;
         double change = cashTendered - netTotal;
 
-        Bill bill = new Bill(0, new Date(), total, discount, cashTendered, change, billItems);
-        int billId = billDAO.saveBill(bill);
+        // Build the decorated Bill
+        Bill decoratedBill = BillBuilder.build(total, discount, cashTendered, change, billItems);
+
+        // Print it
+        System.out.println(decoratedBill.print());
+
+        // Save to DB
+        int billId = billDAO.saveBill(new core.models.Bill(0, new Date(), total, discount, cashTendered, change, billItems));
         billItemDAO.saveBillItems(billId, billItems);
     }
 }

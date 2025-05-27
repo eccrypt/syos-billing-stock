@@ -81,15 +81,38 @@ public class MainCLI {
             }
 
             if (user.getRole().equalsIgnoreCase("employee")) {
-                BillingCLI billingCLI = new BillingCLI(user, connection);
-                billingCLI.startBilling();
+                employeeMenu(user);
             } else {
-                System.out.println("🔒 Access to billing is only for employees.");
+                System.out.println("🔒 Access is only for employees.");
             }
         } else {
             System.out.println("❌ Invalid credentials.");
         }
+    }
 
+    private void employeeMenu(User user) {
+        while (true) {
+            System.out.println("\n=== Employee Menu ===");
+            System.out.println("1. Billing");
+            System.out.println("2. Stock Management");
+            System.out.println("0. Logout");
+
+            String choice = sc.nextLine();
+
+            switch (choice) {
+                case "1":
+                    new BillingCLI(user, connection).startBilling();
+                    break;
+                case "2":
+                    new StockCLI(connection).showMenu();
+                    break;
+                case "0":
+                    System.out.println("🔒 Logging out...");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
     }
 
     public static void main(String[] args) {
