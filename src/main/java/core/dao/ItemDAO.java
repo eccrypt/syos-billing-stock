@@ -19,19 +19,19 @@ public class ItemDAO {
                 return new Item(
                         rs.getString("code"),
                         rs.getString("name"),
-                        rs.getDouble("price"),
-                        rs.getInt("quantity")
+                        rs.getDouble("price")
+//                        rs.getInt("quantity")
                 );
             }
         }
         return null;
     }
-    public void updateItemQuantity(String code, int quantity) throws SQLException {
-        String sql = "UPDATE items SET quantity = quantity - ? WHERE code = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, quantity);
-            stmt.setString(2, code);
-            stmt.executeUpdate();
-        }
-    }
+//    public void updateItemQuantity(String code, int quantity) throws SQLException {
+//        String sql = "UPDATE items SET quantity = quantity - ? WHERE code = ?";
+//        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+//            stmt.setInt(1, quantity);
+//            stmt.setString(2, code);
+//            stmt.executeUpdate();
+//        }
+//    }
 }
