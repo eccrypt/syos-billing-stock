@@ -12,4 +12,6 @@ public abstract class BillDecorator implements Bill {
     public double getCashTendered() { return decoratedBill.getCashTendered(); }
     public double getChangeDue() { return decoratedBill.getChangeDue(); }
     public String print() { return decoratedBill.print(); }
+    public int getSerialNumber() {return decoratedBill.getSerialNumber();}
+
 }

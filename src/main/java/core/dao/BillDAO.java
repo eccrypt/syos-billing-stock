@@ -24,4 +24,14 @@ public class BillDAO {
         }
         return -1;
     }
+    public int getNextBillSerialNumber() throws SQLException {
+        String query = "SELECT COALESCE(MAX(serial_number), 0) + 1 AS next_serial FROM bills";
+        try (PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("next_serial");
+            }
+            return 1;
+        }
+    }
 }

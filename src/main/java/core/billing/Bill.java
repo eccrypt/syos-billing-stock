@@ -6,4 +6,6 @@ public interface Bill {
     double getCashTendered();
     double getChangeDue();
     String print(); // for CLI/receipt output
+    int getSerialNumber();
+
 }

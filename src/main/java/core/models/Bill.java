@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Bill {
     private int id;
+    private int serialNumber;
     private Date billDate;
     private double total;
     private double discount;
@@ -12,8 +13,9 @@ public class Bill {
     private double changeDue;
     private List<BillItem> items;
 
-    public Bill(int id, Date billDate, double total, double discount, double cashTendered, double changeDue, List<BillItem> items) {
+    public Bill(int id, int serialNumber, Date billDate, double total, double discount, double cashTendered, double changeDue, List<BillItem> items) {
         this.id = id;
+        this.serialNumber = serialNumber;
         this.billDate = billDate;
         this.total = total;
         this.discount = discount;
@@ -22,11 +24,40 @@ public class Bill {
         this.items = items;
     }
 
-    public int getId() { return id; }
-    public Date getBillDate() { return billDate; }
-    public double getTotal() { return total; }
-    public double getDiscount() { return discount; }
-    public double getCashTendered() { return cashTendered; }
-    public double getChangeDue() { return changeDue; }
-    public List<BillItem> getItems() { return items; }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(int serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public Date getBillDate() {
+        return billDate;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public double getCashTendered() {
+        return cashTendered;
+    }
+
+    public double getChangeDue() {
+        return changeDue;
+    }
+
+    public List<BillItem> getItems() {
+        return items;
+    }
 }

@@ -8,6 +8,7 @@ import core.dao.ItemDAO;
 import core.models.BillItem;
 import core.models.Item;
 import core.models.StockEntry;
+import core.utils.SerialNumberGenerator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,35 +46,29 @@ public class BillingService {
         for (Map.Entry<String, Integer> entry : purchasedItems.entrySet()) {
             String itemCode = entry.getKey();
             int quantityNeeded = entry.getValue();
-
             Item item = itemService.getItemByCode(itemCode);
-            if (item == null) {
-                throw new SQLException("Item not found: " + itemCode);
-            }
-
+            if (item == null) throw new SQLException("Item not found: " + itemCode);
             double itemTotal = item.getPrice() * quantityNeeded;
             total += itemTotal;
 
-            // Allocate and reduce batch-based stock by expiry date
             List<StockEntry> allocated = stockService.allocateStock(itemCode, quantityNeeded);
-
             int totalAllocated = allocated.stream().mapToInt(StockEntry::getQuantity).sum();
-            if (totalAllocated < quantityNeeded) {
-                throw new SQLException("❌ Insufficient stock for item: " + itemCode);
-            }
+            if (totalAllocated < quantityNeeded) throw new SQLException("❌ Insufficient stock for item: " + itemCode);
 
             billItems.add(new BillItem(item.getCode(), item.getName(), quantityNeeded, itemTotal));
         }
 
         double netTotal = total - discount;
         double change = cashTendered - netTotal;
+        int serialNumber = SerialNumberGenerator.getNextSerial();
 
-        // Build and print decorated bill
-        Bill decoratedBill = BillBuilder.build(total, discount, cashTendered, change, billItems);
+        Bill decoratedBill = BillBuilder.build(total, discount, cashTendered, change, billItems, serialNumber);
         System.out.println(decoratedBill.print());
 
-        // Persist bill
-        int billId = billDAO.saveBill(new core.models.Bill(0, new Date(), total, discount, cashTendered, change, billItems));
+        core.models.Bill bill = new core.models.Bill(0, serialNumber, new Date(), total, discount, cashTendered, change, billItems);
+        bill.setSerialNumber(serialNumber);
+        int billId = billDAO.saveBill(bill);
         billItemDAO.saveBillItems(billId, billItems);
     }
+
 }
