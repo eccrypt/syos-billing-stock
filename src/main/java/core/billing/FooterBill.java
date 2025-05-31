@@ -1,7 +1,6 @@
 package core.billing;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class FooterBill extends BillDecorator {
     public FooterBill(Bill decoratedBill) {
@@ -11,8 +10,14 @@ public class FooterBill extends BillDecorator {
     @Override
     public String print() {
         String base = super.print();
-        String footer = "\nThank you for shopping with us!\nDate: " +
-                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+        String cashLine = String.format("Cash Tendered: %.2f\n", getCashTendered());
+        String changeLine = String.format("Change: %.2f\n", getChangeDue());
+
+        String footer = "\n" + cashLine + changeLine +
+                "Thank you for shopping with us!\nDate: " +
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
+
         return base + footer;
     }
 }

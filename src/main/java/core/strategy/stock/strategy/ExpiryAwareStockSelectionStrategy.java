@@ -26,6 +26,7 @@ public class ExpiryAwareStockSelectionStrategy implements StockSelectionStrategy
 
             int usedQty = Math.min(availableQty, remaining);
             selected.add(new StockEntry(
+                    entry.getId(),
                     entry.getItemCode(),
                     usedQty,
                     entry.getEntryDate(),

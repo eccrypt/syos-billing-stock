@@ -43,7 +43,7 @@ public class UserDAO {
                     System.out.println("[DEBUG] Password match. Logging in...");
                     int id = rs.getInt("id");
                     String role = rs.getString("user_role");
-                    // Use factory here
+                    // User Factory here
                     return UserFactory.createUser(id, username, role);
                 } else {
                     System.out.println("[DEBUG] Password mismatch.");
