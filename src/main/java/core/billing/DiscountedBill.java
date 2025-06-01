@@ -1,5 +1,7 @@
 package core.billing;
 
+import core.models.Bill;
+
 public class DiscountedBill extends BillDecorator {
     public DiscountedBill(Bill decoratedBill) {
         super(decoratedBill);

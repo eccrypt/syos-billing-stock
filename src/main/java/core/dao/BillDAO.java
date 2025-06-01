@@ -1,5 +1,6 @@
 package core.dao;
 
+import core.billing.BasicBill;
 import core.models.Bill;
 
 import java.sql.*;
@@ -69,16 +70,15 @@ public class BillDAO {
         return null;
     }
 
+
     private Bill mapResultSetToBill(ResultSet rs) throws SQLException {
-        return new Bill(
-                rs.getInt("id"),
-                rs.getInt("serial_number"),
-                rs.getTimestamp("bill_date"),
+        return new BasicBill(
                 rs.getDouble("total"),
                 rs.getDouble("discount"),
                 rs.getDouble("cash_tendered"),
                 rs.getDouble("change_due"),
-                new ArrayList<>() // Load BillItems if needed later
+                new ArrayList<>(), // You can load BillItems separately if needed
+                rs.getInt("serial_number")
         );
     }
 }

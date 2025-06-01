@@ -35,16 +35,14 @@ public class BillingCLI {
                 purchasedItems.put(code, purchasedItems.getOrDefault(code, 0) + quantity);
             }
 
-            System.out.print("Enter Discount (0 if none): ");
-            double discount = Double.parseDouble(sc.nextLine());
-
+            // No manual discount input — discount is calculated automatically using discount chain
             double estimatedTotal = billingService.calculateTotal(purchasedItems);
-            System.out.println("Estimated Total (before discount): " + estimatedTotal);
+            System.out.println("Estimated Total (before discounts): " + estimatedTotal);
 
             System.out.print("Enter Cash Tendered: ");
             double cash = Double.parseDouble(sc.nextLine());
 
-            billingService.createBill(purchasedItems, discount, cash);
+            billingService.createBill(purchasedItems, cash);
             System.out.println("🧾 Bill generated successfully and 📦 stock reduced by expiry-aware strategy.");
 
         } catch (SQLException e) {
