@@ -22,6 +22,7 @@ public class EmployeeCLI {
             System.out.println("1. Billing");
             System.out.println("2. Stock Management");
             System.out.println("3. Item Management");
+            System.out.println("4. Generate Report");
             System.out.println("0. Logout");
 
             String choice = sc.nextLine();
@@ -33,6 +34,7 @@ public class EmployeeCLI {
                     ItemService itemService = new ItemService(new ItemDAO(connection));
                     new ItemCLI(itemService).start();
                 }
+                case "4" -> new ReportCLI(sc, connection).showMenu(user);
                 case "0" -> {
                     System.out.println("🔒 Logging out...");
                     return;
@@ -41,4 +43,5 @@ public class EmployeeCLI {
             }
         }
     }
+
 }

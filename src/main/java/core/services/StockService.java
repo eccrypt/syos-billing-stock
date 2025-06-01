@@ -5,22 +5,43 @@ import core.models.StockEntry;
 import core.repositories.StockEntryRepository;
 import core.dao.StockEntryDAO;
 import core.strategy.stock.StockAllocator;
-import core.strategy.stock.strategy.ExpiryAwareStockSelectionStrategy;
+import core.strategy.stock.ExpiryAwareStockSelectionStrategy;
+import core.observer.StockObserver;
+import core.observer.StockSubject;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-public class StockService {
+public class StockService implements StockSubject {
     private final StockEntryRepository stockEntryRepository;
     private final ItemService itemService;
 
+    private final List<StockObserver> observers = new ArrayList<>();
+    private final Map<String, Integer> stockLevels = new HashMap<>();
+
     public StockService(Connection conn, ItemService itemService) {
-        this.stockEntryRepository = new StockEntryDAO(conn); // DAO implements the repository interface
+        this.stockEntryRepository = new StockEntryDAO(conn);
         this.itemService = itemService;
+    }
+
+    @Override
+    public void registerObserver(StockObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(StockObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(String itemCode, int newQuantity) {
+        for (StockObserver observer : observers) {
+            observer.update(itemCode, newQuantity);
+        }
     }
 
     public List<StockEntry> getAllStockEntries() throws SQLException {
@@ -39,6 +60,10 @@ public class StockService {
         Date expiryDate = parseDate(expiryDateStr);
         StockEntry entry = new StockEntry(itemCode, quantity, entryDate, expiryDate);
         stockEntryRepository.insert(entry);
+
+        // Update and notify observers
+        int newQuantity = getTotalStockForItem(itemCode);
+        notifyObservers(itemCode, newQuantity);
     }
 
     public List<StockEntry> allocateStock(String itemCode, int quantity) throws SQLException {
@@ -50,15 +75,32 @@ public class StockService {
             stockEntryRepository.reduceQuantity(entry, entry.getQuantity());
         }
 
+        // Update and notify observers
+        int newQuantity = getTotalStockForItem(itemCode);
+        notifyObservers(itemCode, newQuantity);
+
         return allocated;
     }
 
     public void updateStockEntry(StockEntry entry) throws SQLException {
         stockEntryRepository.update(entry);
+
+        // Update and notify observers
+        int newQuantity = getTotalStockForItem(entry.getItemCode());
+        notifyObservers(entry.getItemCode(), newQuantity);
     }
 
     public void deleteStockEntry(StockEntry entry) throws SQLException {
         stockEntryRepository.delete(entry);
+
+        // Update and notify observers
+        int newQuantity = getTotalStockForItem(entry.getItemCode());
+        notifyObservers(entry.getItemCode(), newQuantity);
+    }
+
+    public int getTotalStockForItem(String itemCode) throws SQLException {
+        List<StockEntry> entries = stockEntryRepository.findAvailableByItemCode(itemCode);
+        return entries.stream().mapToInt(StockEntry::getQuantity).sum();
     }
 
     private Date parseDate(String input) throws ParseException {

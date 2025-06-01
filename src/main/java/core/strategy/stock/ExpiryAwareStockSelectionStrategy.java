@@ -1,5 +1,5 @@
 // File: core/strategy/stock/strategy/ExpiryAwareStockSelectionStrategy.java
-package core.strategy.stock.strategy;
+package core.strategy.stock;
 
 import core.models.StockEntry;
 
