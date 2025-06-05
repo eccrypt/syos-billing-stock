@@ -2,12 +2,16 @@ package cli;
 
 import cli.menus.StockCLIHandler;
 import core.dao.ItemDAO;
+import core.dao.ShelfDAO;
 import core.observer.ReorderNotifier;
 import core.services.ItemService;
+import core.services.ShelfService;
 import core.services.StockService;
 import core.facade.StockFacade;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Scanner;
 
 public class StockCLI {
@@ -15,16 +19,25 @@ public class StockCLI {
     private final Scanner sc = new Scanner(System.in);
 
     public StockCLI(Connection conn) {
-        ItemDAO itemRepo = new ItemDAO(conn);
-        ItemService itemService = new ItemService(itemRepo);
-        StockService stockService = new StockService(conn, itemService);
-        ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);
-        StockFacade stockFacade = new StockFacade(itemService, stockService, reorderNotifier);
+        // Create the required DAOs and Services
+        ItemDAO itemRepo = new ItemDAO(conn);  // ItemDAO
+        ShelfService shelfService = new ShelfService(new ShelfDAO(conn));  // ShelfService
 
+        // Create ItemService with both ItemDAO and ShelfService
+        ItemService itemService = new ItemService(itemRepo, shelfService);  // Pass both ItemDAO and ShelfService
+
+        // Create StockService, passing ShelfService and ItemService
+        StockService stockService = new StockService(conn, itemService, shelfService);  // Pass ShelfService here
+        ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);
+
+        // Create StockFacade, passing all the required services
+        StockFacade stockFacade = new StockFacade(itemService, stockService, shelfService, reorderNotifier);
+
+        // Initialize the handler with StockFacade
         this.handler = new StockCLIHandler(stockFacade);
     }
 
-    public void showMenu() {
+    public void showMenu() throws SQLException, ParseException {
         while (true) {
             System.out.println("\n=== Stock Management ===");
             System.out.println("1. Add Stock Entry");

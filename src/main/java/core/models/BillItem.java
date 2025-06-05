@@ -17,4 +17,5 @@ public class BillItem {
     public String getItemName() { return itemName; }
     public int getQuantity() { return quantity; }
     public double getTotalPrice() { return totalPrice; }
+
 }

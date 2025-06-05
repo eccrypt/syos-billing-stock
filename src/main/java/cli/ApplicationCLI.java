@@ -4,6 +4,8 @@ import core.models.User;
 import core.services.AuthenticationService;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Scanner;
 
 public class ApplicationCLI {
@@ -16,7 +18,7 @@ public class ApplicationCLI {
         this.employeeCLI = new EmployeeCLI(sc, connection);
     }
 
-    public void start() {
+    public void start() throws SQLException, ParseException {
         while (true) {
             System.out.println("\n=== SYOS CLI ===");
             System.out.println("1. Register");
@@ -45,7 +47,7 @@ public class ApplicationCLI {
         }
     }
 
-    private void routeToCLI(User user) {
+    private void routeToCLI(User user) throws SQLException, ParseException {
         switch (user.getRole().toLowerCase()) {
             case "employee" -> employeeCLI.menu(user);
             case "admin" -> System.out.println("Admin CLI not implemented yet.");

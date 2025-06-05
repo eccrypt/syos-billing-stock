@@ -2,6 +2,7 @@ package core.services;
 
 import core.models.Item;
 import core.models.StockEntry;
+import core.models.Shelf;
 import core.repositories.StockEntryRepository;
 import core.dao.StockEntryDAO;
 import core.strategy.stock.StockAllocator;
@@ -16,15 +17,23 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class StockService implements StockSubject {
+
     private final StockEntryRepository stockEntryRepository;
     private final ItemService itemService;
+    private final ShelfService shelfService;  // Add ShelfService
 
     private final List<StockObserver> observers = new ArrayList<>();
     private final Map<String, Integer> stockLevels = new HashMap<>();
 
-    public StockService(Connection conn, ItemService itemService) {
+    public StockService(Connection conn, ItemService itemService, ShelfService shelfService) {
         this.stockEntryRepository = new StockEntryDAO(conn);
         this.itemService = itemService;
+        this.shelfService = shelfService;  // Initialize ShelfService
+    }
+
+    // Add the method to expose ShelfService
+    public ShelfService getShelfService() {
+        return shelfService;
     }
 
     @Override
@@ -46,6 +55,11 @@ public class StockService implements StockSubject {
 
     public List<StockEntry> getAllStockEntries() throws SQLException {
         return stockEntryRepository.findAll();
+    }
+
+    // Fetch the stock entry by itemCode
+    public StockEntry getStockEntryByItemCode(String itemCode) throws SQLException {
+        return ((StockEntryDAO) stockEntryRepository).getStockEntryByItemCode(itemCode);
     }
 
     public void addStockEntry(String itemCode, int quantity, String entryDateStr, String expiryDateStr)
@@ -115,3 +129,4 @@ public class StockService implements StockSubject {
         }
     }
 }
+

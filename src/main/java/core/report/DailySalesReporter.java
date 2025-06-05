@@ -25,7 +25,7 @@ public class DailySalesReporter implements ReportTemplate {
             System.out.printf("=== Daily Sales Report (%s) ===%n", targetDate);
             for (Bill bill : bills) {
                 totalRevenue += bill.getTotal();
-                System.out.printf("Bill #%d | Total: %.2f%n", bill.getId(), bill.getTotal());
+                System.out.printf("Bill #%d | Total: %.2f%n", bill.getSerialNumber(), bill.getTotal());
             }
 
             System.out.printf("Total Bills: %d | Total Revenue: %.2f%n", totalBills, totalRevenue);

@@ -2,6 +2,10 @@ package cli.menus;
 
 import core.facade.StockFacade;
 
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class StockCLIHandler {
@@ -19,8 +23,10 @@ public class StockCLIHandler {
         System.out.print("Enter Quantity: ");
         int quantity = Integer.parseInt(sc.nextLine());
 
-        System.out.print("Enter Entry Date (yyyy-MM-dd): ");
-        String entryDate = sc.nextLine();
+        System.out.println("Entry Date Will be the Current Date");
+        LocalDate currentDate = LocalDate.now();
+        // Convert it to a string in the desired format (yyyy-MM-dd)
+        String entryDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         System.out.print("Enter Expiry Date (yyyy-MM-dd): ");
         String expiryDate = sc.nextLine();
@@ -52,9 +58,9 @@ public class StockCLIHandler {
         stockFacade.printStockLevel(code);
     }
 
-    public void handleUpdateStockEntry() {
-        System.out.print("Enter Stock Entry ID to update: ");
-        int entryId = Integer.parseInt(sc.nextLine());
+    public void handleUpdateStockEntry() throws SQLException, ParseException {
+        System.out.print("Enter Item Code to update: ");
+        String itemCode = sc.nextLine();
 
         System.out.print("Enter New Quantity: ");
         int quantity = Integer.parseInt(sc.nextLine());
@@ -62,7 +68,8 @@ public class StockCLIHandler {
         System.out.print("Enter New Expiry Date (yyyy-MM-dd): ");
         String expiryDate = sc.nextLine();
 
-        stockFacade.updateStockEntry(entryId, quantity, expiryDate);
+        // Update the stock entry using itemCode and quantity
+        stockFacade.updateStockEntry(itemCode, quantity, expiryDate);
     }
 
     public void handleDeleteStockEntry() {

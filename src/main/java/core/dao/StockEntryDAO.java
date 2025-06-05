@@ -65,7 +65,7 @@ public class StockEntryDAO implements StockEntryRepository {
 
             while (rs.next()) {
                 entries.add(new StockEntry(
-                        rs.getInt("stock_entry_id"), // Corrected column name
+                        rs.getInt("stock_entry_id"),
                         rs.getString("item_code"),
                         rs.getInt("quantity"),
                         rs.getDate("entry_date"),
@@ -87,7 +87,7 @@ public class StockEntryDAO implements StockEntryRepository {
 
             while (rs.next()) {
                 entries.add(new StockEntry(
-                        rs.getInt("stock_entry_id"), // Corrected column name
+                        rs.getInt("stock_entry_id"),
                         rs.getString("item_code"),
                         rs.getInt("quantity"),
                         rs.getDate("entry_date"),
@@ -106,6 +106,27 @@ public class StockEntryDAO implements StockEntryRepository {
             stmt.setInt(1, reduceQty);
             stmt.setInt(2, entry.getId());
             stmt.executeUpdate();
+        }
+    }
+
+    // New method to get StockEntry by item code
+    public StockEntry getStockEntryByItemCode(String itemCode) throws SQLException {
+        String sql = "SELECT * FROM stock_entries WHERE item_code = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, itemCode);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new StockEntry(
+                        rs.getInt("stock_entry_id"),
+                        rs.getString("item_code"),
+                        rs.getInt("quantity"),
+                        rs.getDate("entry_date"),
+                        rs.getDate("expiry_date")
+                );
+            } else {
+                return null; // Return null if no entry is found
+            }
         }
     }
 }

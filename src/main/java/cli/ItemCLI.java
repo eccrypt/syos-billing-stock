@@ -2,16 +2,20 @@ package cli;
 
 import cli.menus.ItemCLIHandler;
 import core.services.ItemService;
+import core.facade.StockFacade;
+import core.services.ShelfService;  // Import ShelfService
 
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Scanner;
 
 public class ItemCLI {
     private final ItemCLIHandler handler;
     private final Scanner scanner = new Scanner(System.in);
 
-    public ItemCLI(ItemService itemService) {
-        this.handler = new ItemCLIHandler(itemService);
+    // Modify constructor to accept ItemService, ShelfService, and StockFacade
+    public ItemCLI(ItemService itemService, ShelfService shelfService, StockFacade stockFacade) {
+        this.handler = new ItemCLIHandler(itemService, shelfService, stockFacade);  // Pass ItemService, ShelfService, and StockFacade to the handler
     }
 
     public void start() {
@@ -48,6 +52,8 @@ public class ItemCLI {
                 System.out.println("❌ Database error: " + e.getMessage());
             } catch (NumberFormatException e) {
                 System.out.println("❌ Invalid number format. Please try again.");
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
         }
     }

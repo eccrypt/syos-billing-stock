@@ -1,14 +1,17 @@
 package cli;
 
+import cli.menus.StockCLIHandler;
 import core.command.Command;
 import core.command.GenerateReportCommand;
 import core.command.ReportInvoker;
 import core.dao.BillDAO;
 import core.dao.ItemDAO;
+import core.dao.ShelfDAO;
 import core.models.User;
 import core.observer.ReorderNotifier;
 import core.report.*;
 import core.services.ItemService;
+import core.services.ShelfService; // Import ShelfService
 import core.services.StockService;
 
 import java.sql.Connection;
@@ -52,11 +55,15 @@ public class ReportCLI {
 
     private void generateReorderReport() {
         try {
-            ItemService itemService = new ItemService(new ItemDAO(connection));
-            StockService stockService = new StockService(connection, itemService);
+            // Create ShelfService instance
+            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
+
+            // Create ItemService with both ItemDAO and ShelfService
+            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
 
             // ReorderNotifier should have been updated during real stock activity
             ReorderNotifier notifier = new ReorderNotifier(itemService);
+            StockService stockService = new StockService(connection, itemService, shelfService);
             stockService.registerObserver(notifier); // Simulate updates in this context
 
             ReportTemplate report = new ReorderReport(notifier, itemService);
@@ -84,8 +91,13 @@ public class ReportCLI {
 
     private void generateStockReport() {
         try {
-            ItemService itemService = new ItemService(new ItemDAO(connection));
-            StockService stockService = new StockService(connection, itemService);
+            // Create ShelfService instance
+            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
+
+            // Create ItemService with both ItemDAO and ShelfService
+            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
+
+            StockService stockService = new StockService(connection, itemService, shelfService);
             ReportTemplate report = new StockReport(stockService);
             Command command = new GenerateReportCommand(report);
             command.execute();
@@ -115,8 +127,9 @@ public class ReportCLI {
             ReportInvoker invoker = new ReportInvoker();
 
             // Reorder Report
-            ItemService itemService = new ItemService(new ItemDAO(connection));
-            StockService stockService = new StockService(connection, itemService);
+            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
+            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
+            StockService stockService = new StockService(connection, itemService, shelfService);
             ReorderNotifier notifier = new ReorderNotifier(itemService);
             stockService.registerObserver(notifier);
             invoker.addCommand(new GenerateReportCommand(new ReorderReport(notifier, itemService)));
@@ -140,5 +153,4 @@ public class ReportCLI {
             System.out.println("❌ Failed to generate all reports: " + e.getMessage());
         }
     }
-
 }

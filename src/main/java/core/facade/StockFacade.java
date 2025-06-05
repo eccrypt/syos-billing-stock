@@ -2,9 +2,11 @@ package core.facade;
 
 import core.models.Item;
 import core.models.StockEntry;
-import core.observer.ReorderNotifier;
+import core.models.Shelf;
 import core.services.ItemService;
 import core.services.StockService;
+import core.services.ShelfService;
+import core.observer.ReorderNotifier;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -16,15 +18,22 @@ public class StockFacade {
 
     private final ItemService itemService;
     private final StockService stockService;
+    private final ShelfService shelfService;  // Add ShelfService
     private final ReorderNotifier reorderNotifier;
 
-    public StockFacade(ItemService itemService, StockService stockService, ReorderNotifier reorderNotifier) {
+    public StockFacade(ItemService itemService, StockService stockService, ShelfService shelfService, ReorderNotifier reorderNotifier) {
         this.itemService = itemService;
         this.stockService = stockService;
+        this.shelfService = shelfService;  // Initialize ShelfService
         this.reorderNotifier = reorderNotifier;
 
         // Register the notifier as an observer
         this.stockService.registerObserver(reorderNotifier);
+    }
+
+    // Expose ShelfService directly
+    public ShelfService getShelfService() {
+        return shelfService;
     }
 
     /**
@@ -37,10 +46,52 @@ public class StockFacade {
                 return;
             }
 
+            // Add the stock entry to the system
             stockService.addStockEntry(itemCode, quantity, entryDate, expiryDate);
             System.out.println("✅ Stock entry added successfully.");
+
+
         } catch (SQLException | ParseException e) {
             System.out.println("❌ Failed to stock item: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update the shelf's current stock value after stock addition.
+     */
+    private void updateShelfAfterStockAddition(String itemCode, int quantity) throws SQLException {
+        // Retrieve the shelf for the item
+        Shelf shelf = shelfService.getShelfByProductCode(itemCode);
+
+        if (shelf != null) {
+            // Update the shelf's current quantity
+            int updatedShelfCurrent = shelf.getShelfCurrent() + quantity;
+            shelf.setShelfCurrent(updatedShelfCurrent);
+
+            // Update the shelf in the database
+            shelfService.updateShelf(shelf);
+            System.out.println("✅ Shelf updated: Current quantity is now " + updatedShelfCurrent);
+        } else {
+            System.out.println("⚠️ Shelf not found for item code: " + itemCode);
+        }
+    }
+
+    /**
+     * Add a shelf for the given item with default quantity.
+     */
+    public void addShelfForItem(String productCode, int shelfDefault, int shelfCurrent) throws SQLException {
+        Shelf newShelf = new Shelf(productCode, shelfDefault, shelfCurrent);
+        shelfService.addShelf(newShelf);
+    }
+
+    /**
+     * Update the shelf's current quantity based on the item stock.
+     */
+    public void updateShelfForItem(String productCode, int shelfCurrent) throws SQLException {
+        Shelf shelf = shelfService.getShelfByProductCode(productCode);
+        if (shelf != null) {
+            shelf.setShelfCurrent(shelfCurrent);
+            shelfService.updateShelf(shelf);
         }
     }
 
@@ -117,26 +168,20 @@ public class StockFacade {
         }
     }
 
-    public void updateStockEntry(int entryId, int newQuantity, String newExpiryDate) {
-        try {
-            StockEntry existing = stockService.getAllStockEntries().stream()
-                    .filter(e -> e.getId() == entryId)
-                    .findFirst()
-                    .orElse(null);
+    public void updateStockEntry(String itemCode, int quantity, String expiryDate) throws SQLException, ParseException {
+        // Retrieve the stock entry using the itemCode
+        StockEntry stockEntry = stockService.getStockEntryByItemCode(itemCode);
 
-            if (existing == null) {
-                System.out.println("⚠️ No stock entry found with ID " + entryId);
-                return;
-            }
+        if (stockEntry != null) {
+            // Set the updated quantity and expiry date
+            stockEntry.setQuantity(quantity);
+            stockEntry.setExpiryDate(new SimpleDateFormat("yyyy-MM-dd").parse(expiryDate));
 
-            existing.setQuantity(newQuantity);
-            existing.setExpiryDate(new SimpleDateFormat("yyyy-MM-dd").parse(newExpiryDate));
-
-            stockService.updateStockEntry(existing);
+            // Update the stock entry in the database
+            stockService.updateStockEntry(stockEntry);
             System.out.println("✅ Stock entry updated successfully.");
-
-        } catch (SQLException | ParseException e) {
-            System.out.println("❌ Failed to update stock entry: " + e.getMessage());
+        } else {
+            System.out.println("❌ No stock entry found for item code: " + itemCode);
         }
     }
 
@@ -160,5 +205,4 @@ public class StockFacade {
             System.out.println("❌ Failed to delete stock entry: " + e.getMessage());
         }
     }
-
 }
