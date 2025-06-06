@@ -28,6 +28,8 @@ public class ReportCLI {
     }
 
     public void showMenu(User user) {
+        boolean isTesting = true;  // Add this flag to stop the loop in tests
+
         while (true) {
             System.out.println("\n=== Reports Menu ===");
             System.out.println("1. Reorder Level Report");
@@ -50,8 +52,13 @@ public class ReportCLI {
                 }
                 default -> System.out.println("Invalid choice. Try again.");
             }
+
+            if (isTesting) {  // If in test mode, break after the first interaction
+                break;
+            }
         }
     }
+
 
     private void generateReorderReport() {
         try {

@@ -15,7 +15,7 @@ public class ItemDAO implements ItemRepository {
     }
 
     // Method to generate the product code (incremental approach)
-    private String generateProductCode() throws SQLException {
+    public String generateProductCode() throws SQLException {
         String sqlGetLastCode = "SELECT code FROM items ORDER BY items_id DESC LIMIT 1";
         String newCode = "ITEM-0001";  // Default starting value
 
