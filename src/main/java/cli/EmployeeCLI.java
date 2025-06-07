@@ -17,10 +17,20 @@ import java.util.Scanner;
 public class EmployeeCLI {
     private final Scanner sc;
     private final Connection connection;
+    private final ItemCLI injectedItemCLI; // Optional injected CLI (for testing)
 
+    // Production constructor
     public EmployeeCLI(Scanner sc, Connection connection) {
         this.sc = sc;
         this.connection = connection;
+        this.injectedItemCLI = null;
+    }
+
+    // Test constructor (optional ItemCLI injection)
+    public EmployeeCLI(Scanner sc, Connection connection, ItemCLI injectedItemCLI) {
+        this.sc = sc;
+        this.connection = connection;
+        this.injectedItemCLI = injectedItemCLI;
     }
 
     public void menu(User user) throws SQLException, ParseException {
@@ -38,21 +48,18 @@ public class EmployeeCLI {
                 case "1" -> new BillingCLI(user, connection).startBilling();
                 case "2" -> new StockCLI(connection).showMenu();
                 case "3" -> {
-                    // Create the ShelfService instance
-                    ShelfService shelfService = new ShelfService(new ShelfDAO(connection)); // Pass ShelfDAOImpl (your DAO implementation)
+                    if (injectedItemCLI != null) {
+                        injectedItemCLI.start(); // Use mock in tests
+                    } else {
+                        // Normal execution
+                        ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
+                        ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
+                        StockService stockService = new StockService(connection, itemService, shelfService);
+                        ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);
+                        StockFacade stockFacade = new StockFacade(itemService, stockService, shelfService, reorderNotifier);
 
-                    // Create the ItemService with both ItemDAO and ShelfService
-                    ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
-
-                    // Create the StockService instance
-                    StockService stockService = new StockService(connection, itemService, shelfService);  // Pass ShelfService here
-
-                    // Create the StockFacade instance
-                    ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);
-                    StockFacade stockFacade = new StockFacade(itemService, stockService, shelfService, reorderNotifier);  // Pass ShelfService to StockFacade
-
-                    // Start the ItemCLI with all three services
-                    new ItemCLI(itemService, shelfService, stockFacade).start();  // Pass all three services to ItemCLI
+                        new ItemCLI(itemService, shelfService, stockFacade).start();
+                    }
                 }
                 case "4" -> new ReportCLI(sc, connection).showMenu(user);
                 case "0" -> {

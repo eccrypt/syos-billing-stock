@@ -35,21 +35,17 @@ public class UserDAO {
                 String storedHash = rs.getString("password_hash");
                 String inputHash = EncryptionUtil.hashPassword(password);
 
-                System.out.println("[DEBUG] Username found: " + username);
-                System.out.println("[DEBUG] Stored Hash: " + storedHash);
-                System.out.println("[DEBUG] Input Hash: " + inputHash);
-
                 if (storedHash.equals(inputHash)) {
-                    System.out.println("[DEBUG] Password match. Logging in...");
+                    System.out.println("Password match. Logging in...");
                     int id = rs.getInt("id");
                     String role = rs.getString("user_role");
                     // User Factory here
                     return UserFactory.createUser(id, username, role);
                 } else {
-                    System.out.println("[DEBUG] Password mismatch.");
+                    System.out.println("Password mismatch.");
                 }
             } else {
-                System.out.println("[DEBUG] Username not found.");
+                System.out.println("Username not found.");
             }
         } catch (SQLException e) {
             System.err.println("[ERROR] Login error: " + e.getMessage());

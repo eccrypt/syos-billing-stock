@@ -10,10 +10,17 @@ import java.util.Scanner;
 
 public class StockCLIHandler {
     private final StockFacade stockFacade;
-    private final Scanner sc = new Scanner(System.in);
+    private final Scanner sc;
 
+    // ✅ Default constructor (used in production)
     public StockCLIHandler(StockFacade stockFacade) {
+        this(stockFacade, new Scanner(System.in));
+    }
+
+    // ✅ Test constructor (allows injection of a mock Scanner)
+    public StockCLIHandler(StockFacade stockFacade, Scanner scanner) {
         this.stockFacade = stockFacade;
+        this.sc = scanner;
     }
 
     public void handleAddStockEntry() {
@@ -25,7 +32,6 @@ public class StockCLIHandler {
 
         System.out.println("Entry Date Will be the Current Date");
         LocalDate currentDate = LocalDate.now();
-        // Convert it to a string in the desired format (yyyy-MM-dd)
         String entryDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         System.out.print("Enter Expiry Date (yyyy-MM-dd): ");
@@ -68,7 +74,6 @@ public class StockCLIHandler {
         System.out.print("Enter New Expiry Date (yyyy-MM-dd): ");
         String expiryDate = sc.nextLine();
 
-        // Update the stock entry using itemCode and quantity
         stockFacade.updateStockEntry(itemCode, quantity, expiryDate);
     }
 

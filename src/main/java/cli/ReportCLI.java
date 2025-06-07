@@ -1,3 +1,4 @@
+// === PRODUCTION VERSION ===
 package cli;
 
 import cli.menus.StockCLIHandler;
@@ -11,7 +12,7 @@ import core.models.User;
 import core.observer.ReorderNotifier;
 import core.report.*;
 import core.services.ItemService;
-import core.services.ShelfService; // Import ShelfService
+import core.services.ShelfService;
 import core.services.StockService;
 
 import java.sql.Connection;
@@ -21,15 +22,44 @@ import java.util.Scanner;
 public class ReportCLI {
     private final Scanner sc;
     private final Connection connection;
+    private final BillDAO billDAO;
+    private final StockService stockService;
+    private final ItemService itemService;
+    private final ShelfService shelfService;
+    private final ReorderNotifier reorderNotifier;
+    private final boolean isTest;
 
+    // === Constructor for production ===
     public ReportCLI(Scanner sc, Connection connection) {
         this.sc = sc;
         this.connection = connection;
+        this.shelfService = new ShelfService(new ShelfDAO(connection));
+        this.itemService = new ItemService(new ItemDAO(connection), shelfService);
+        this.reorderNotifier = new ReorderNotifier(itemService);
+        this.stockService = new StockService(connection, itemService, shelfService);
+        this.stockService.registerObserver(reorderNotifier);
+        this.billDAO = new BillDAO(connection);
+        this.isTest = false;
+    }
+
+    // === Constructor for testing ===
+    public ReportCLI(Scanner sc, Connection connection,
+                     BillDAO billDAO,
+                     StockService stockService,
+                     ItemService itemService,
+                     ShelfService shelfService,
+                     ReorderNotifier reorderNotifier) {
+        this.sc = sc;
+        this.connection = connection;
+        this.billDAO = billDAO;
+        this.stockService = stockService;
+        this.itemService = itemService;
+        this.shelfService = shelfService;
+        this.reorderNotifier = reorderNotifier;
+        this.isTest = true;
     }
 
     public void showMenu(User user) {
-        boolean isTesting = true;  // Add this flag to stop the loop in tests
-
         while (true) {
             System.out.println("\n=== Reports Menu ===");
             System.out.println("1. Reorder Level Report");
@@ -53,29 +83,14 @@ public class ReportCLI {
                 default -> System.out.println("Invalid choice. Try again.");
             }
 
-            if (isTesting) {  // If in test mode, break after the first interaction
-                break;
-            }
+            if (isTest) break;
         }
     }
 
-
     private void generateReorderReport() {
         try {
-            // Create ShelfService instance
-            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
-
-            // Create ItemService with both ItemDAO and ShelfService
-            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
-
-            // ReorderNotifier should have been updated during real stock activity
-            ReorderNotifier notifier = new ReorderNotifier(itemService);
-            StockService stockService = new StockService(connection, itemService, shelfService);
-            stockService.registerObserver(notifier); // Simulate updates in this context
-
-            ReportTemplate report = new ReorderReport(notifier, itemService);
-            Command command = new GenerateReportCommand(report);
-            command.execute();
+            ReportTemplate report = new ReorderReport(reorderNotifier, itemService);
+            new GenerateReportCommand(report).execute();
         } catch (Exception e) {
             System.out.println("❌ Failed to generate reorder report: " + e.getMessage());
         }
@@ -83,14 +98,10 @@ public class ReportCLI {
 
     private void generateDailySalesReport() {
         try {
-            BillDAO billDAO = new BillDAO(connection);
             System.out.print("📅 Enter date for report (YYYY-MM-DD): ");
-            String dateInput = sc.nextLine();
-            LocalDate date = LocalDate.parse(dateInput);
-
+            LocalDate date = LocalDate.parse(sc.nextLine());
             ReportTemplate report = new DailySalesReporter(billDAO, date);
-            Command command = new GenerateReportCommand(report);
-            command.execute();
+            new GenerateReportCommand(report).execute();
         } catch (Exception e) {
             System.out.println("❌ Failed to generate daily sales report: " + e.getMessage());
         }
@@ -98,16 +109,8 @@ public class ReportCLI {
 
     private void generateStockReport() {
         try {
-            // Create ShelfService instance
-            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
-
-            // Create ItemService with both ItemDAO and ShelfService
-            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
-
-            StockService stockService = new StockService(connection, itemService, shelfService);
             ReportTemplate report = new StockReport(stockService);
-            Command command = new GenerateReportCommand(report);
-            command.execute();
+            new GenerateReportCommand(report).execute();
         } catch (Exception e) {
             System.out.println("❌ Failed to generate stock report: " + e.getMessage());
         }
@@ -115,15 +118,10 @@ public class ReportCLI {
 
     private void generateBillReport() {
         try {
-            BillDAO billDAO = new BillDAO(connection);
-
             System.out.print("📅 Enter date for bill report (YYYY-MM-DD): ");
-            String dateInput = sc.nextLine();
-            LocalDate date = LocalDate.parse(dateInput);
-
+            LocalDate date = LocalDate.parse(sc.nextLine());
             ReportTemplate report = new BillReport(billDAO, date);
-            Command command = new GenerateReportCommand(report);
-            command.execute();
+            new GenerateReportCommand(report).execute();
         } catch (Exception e) {
             System.out.println("❌ Failed to generate bill report: " + e.getMessage());
         }
@@ -131,31 +129,14 @@ public class ReportCLI {
 
     private void generateAllReports() {
         try {
-            ReportInvoker invoker = new ReportInvoker();
-
-            // Reorder Report
-            ShelfService shelfService = new ShelfService(new ShelfDAO(connection));
-            ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);
-            StockService stockService = new StockService(connection, itemService, shelfService);
-            ReorderNotifier notifier = new ReorderNotifier(itemService);
-            stockService.registerObserver(notifier);
-            invoker.addCommand(new GenerateReportCommand(new ReorderReport(notifier, itemService)));
-
-            // Daily Sales Report
-            BillDAO billDAO = new BillDAO(connection);
             System.out.print("📅 Enter date for sales and bill reports (YYYY-MM-DD): ");
             LocalDate date = LocalDate.parse(sc.nextLine());
+            ReportInvoker invoker = new ReportInvoker();
+            invoker.addCommand(new GenerateReportCommand(new ReorderReport(reorderNotifier, itemService)));
             invoker.addCommand(new GenerateReportCommand(new DailySalesReporter(billDAO, date)));
-
-            // Stock Report
             invoker.addCommand(new GenerateReportCommand(new StockReport(stockService)));
-
-            // Bill Report
             invoker.addCommand(new GenerateReportCommand(new BillReport(billDAO, date)));
-
-            // Execute all
             invoker.runCommands();
-
         } catch (Exception e) {
             System.out.println("❌ Failed to generate all reports: " + e.getMessage());
         }

@@ -3,7 +3,7 @@ package cli.menus;
 import core.models.Item;
 import core.models.Shelf;
 import core.services.ItemService;
-import core.facade.StockFacade;  // Import StockFacade
+import core.facade.StockFacade;
 import core.services.ShelfService;
 
 import java.sql.SQLException;
@@ -15,18 +15,23 @@ import java.util.Scanner;
 
 public class ItemCLIHandler {
     private final ItemService itemService;
-    private final ShelfService shelfService;  // Added ShelfService here
+    private final ShelfService shelfService;
     private final StockFacade stockFacade;
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
 
-    // Modify constructor to accept ItemService, ShelfService, and StockFacade
-    public ItemCLIHandler(ItemService itemService, ShelfService shelfService, StockFacade stockFacade) {
+    // Constructor that accepts a custom Scanner
+    public ItemCLIHandler(ItemService itemService, ShelfService shelfService, StockFacade stockFacade, Scanner scanner) {
         this.itemService = itemService;
         this.shelfService = shelfService;
-        this.stockFacade = stockFacade;  // Initialize all services
+        this.stockFacade = stockFacade;
+        this.scanner = scanner;
     }
 
-    // Methods for item management
+    // Default constructor using a new Scanner
+    public ItemCLIHandler(ItemService itemService, ShelfService shelfService, StockFacade stockFacade) {
+        this(itemService, shelfService, stockFacade, new Scanner(System.in));
+    }
+
     public void handleViewAllItems() throws SQLException {
         List<Item> items = itemService.getAllItems();
         if (items.isEmpty()) {
@@ -67,67 +72,45 @@ public class ItemCLIHandler {
     }
 
     public void handleAddItem() throws SQLException, ParseException {
-        // Get the item name and price from user input
         System.out.print("Enter item name: ");
         String name = scanner.nextLine();
         System.out.print("Enter item price: ");
         double price = Double.parseDouble(scanner.nextLine());
 
-        // Ask the user for shelf quantities
         System.out.println("\nThis Shelf is allocated for this Item");
         System.out.print("Enter default shelf quantity: ");
-        int shelfDefault = Integer.parseInt(scanner.nextLine());  // User input for default shelf quantity
+        int shelfDefault = Integer.parseInt(scanner.nextLine());
 
-        // Ask the user for Quantity, Entry Date, and Expiry for Stock Entry
         System.out.println("\nFirst Stock Batch Creation");
         System.out.print("Enter Quantity: ");
         int quantity = Integer.parseInt(scanner.nextLine());
         System.out.println("Entry Date Will be the Current Date");
         LocalDate currentDate = LocalDate.now();
-        // Convert it to a string in the desired format (yyyy-MM-dd)
         String entryDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         System.out.print("Enter Expiry Date (yyyy-MM-dd): ");
         String expiryDate = scanner.nextLine();
 
-        // Create the item with the user-provided name and price (product code will be auto-generated)
-        Item newItem = new Item(name, price);  // No code required, it's auto-generated
-
-        // Add the item through the ItemService (which will generate the product code)
+        Item newItem = new Item(name, price);
         itemService.addItem(newItem, shelfDefault, 0);
         System.out.println("✅ Item added with product code: " + newItem.getCode());
 
-        // Add the First Stock Batch When the Item is added for the first Time
-        stockFacade.stockItem(newItem.getCode(), quantity, entryDate, expiryDate);  // This already updates stock entry
+        stockFacade.stockItem(newItem.getCode(), quantity, entryDate, expiryDate);
 
-        // Create and add the shelf with the provided default quantity
-        Shelf newShelf = new Shelf(newItem.getCode(), shelfDefault, shelfDefault);  // Set shelf's default and current values
-        stockFacade.getShelfService().addShelf(newShelf);  // Add the shelf
+        Shelf newShelf = new Shelf(newItem.getCode(), shelfDefault, shelfDefault);
+        stockFacade.getShelfService().addShelf(newShelf);
         System.out.println("✅ Shelf created with default quantity: " + shelfDefault + ".");
 
-
-        // Now update the shelf's current value based on the quantity of the first batch
-        // Step 1: Refill the shelf's current value with the default quantity
-        newShelf.setShelfCurrent(newShelf.getShelfDefault());  // Refill current value to the default value
-
-        // Step 2: Reduce the shelf's default quantity from the stock batch quantity
-        int reducedStockBatchQuantity = quantity - newShelf.getShelfDefault();  // Subtract the shelf's default value from the stock batch quantity
+        newShelf.setShelfCurrent(newShelf.getShelfDefault());
+        int reducedStockBatchQuantity = quantity - newShelf.getShelfDefault();
 
         if (reducedStockBatchQuantity > 0) {
-            // Step 3: Adjust the stock entry's quantity to reflect the reduction of stock for the shelf's default value
-            stockFacade.updateStockEntry(newItem.getCode(), reducedStockBatchQuantity, expiryDate);  // Update the stock entry with the reduced quantity
+            stockFacade.updateStockEntry(newItem.getCode(), reducedStockBatchQuantity, expiryDate);
         }
 
-        // Update the shelf entry in the database
-        stockFacade.getShelfService().updateShelf(newShelf);  // Update the shelf entry in the database
-
-        // Inform the user of the successful addition and show the generated product code
+        stockFacade.getShelfService().updateShelf(newShelf);
         System.out.println("✅ Shelf current quantity updated to: " + newShelf.getShelfCurrent());
     }
-
-
-
-
 
     public void handleUpdateItem() throws SQLException {
         System.out.print("Enter item code: ");
@@ -168,27 +151,22 @@ public class ItemCLIHandler {
         System.out.println("✅ Item deleted.");
     }
 
-    // New method to handle Stock Facade functionality
     public void handleAllocateStock() throws SQLException {
         System.out.print("Enter item code for allocation: ");
         String itemCode = scanner.nextLine();
         System.out.print("Enter quantity to allocate: ");
         int quantity = Integer.parseInt(scanner.nextLine());
 
-        // Call the allocate stock method from StockFacade
         stockFacade.allocateStock(itemCode, quantity);
     }
 
     public void handleViewStockLevel() throws SQLException {
         System.out.print("Enter item code to check stock level: ");
         String itemCode = scanner.nextLine();
-
-        // Call the print stock level method from StockFacade
         stockFacade.printStockLevel(itemCode);
     }
 
     public void handleCheckReorderAlerts() throws SQLException {
-        // Call the check reorder alerts method from StockFacade
         stockFacade.checkAndPrintReorderAlerts();
     }
 }

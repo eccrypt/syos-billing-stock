@@ -18,23 +18,20 @@ public class StockCLI {
     private final StockCLIHandler handler;
     private final Scanner sc = new Scanner(System.in);
 
+    // Original constructor for production
     public StockCLI(Connection conn) {
-        // Create the required DAOs and Services
-        ItemDAO itemRepo = new ItemDAO(conn);  // ItemDAO
-        ShelfService shelfService = new ShelfService(new ShelfDAO(conn));  // ShelfService
-
-        // Create ItemService with both ItemDAO and ShelfService
-        ItemService itemService = new ItemService(itemRepo, shelfService);  // Pass both ItemDAO and ShelfService
-
-        // Create StockService, passing ShelfService and ItemService
-        StockService stockService = new StockService(conn, itemService, shelfService);  // Pass ShelfService here
+        ItemDAO itemRepo = new ItemDAO(conn);
+        ShelfService shelfService = new ShelfService(new ShelfDAO(conn));
+        ItemService itemService = new ItemService(itemRepo, shelfService);
+        StockService stockService = new StockService(conn, itemService, shelfService);
         ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);
-
-        // Create StockFacade, passing all the required services
         StockFacade stockFacade = new StockFacade(itemService, stockService, shelfService, reorderNotifier);
-
-        // Initialize the handler with StockFacade
         this.handler = new StockCLIHandler(stockFacade);
+    }
+
+    // New constructor for testing
+    public StockCLI(StockCLIHandler handler) {
+        this.handler = handler;
     }
 
     public void showMenu() throws SQLException, ParseException {
