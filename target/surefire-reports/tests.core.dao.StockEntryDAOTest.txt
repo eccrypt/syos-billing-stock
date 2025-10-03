@@ -1,0 +1,60 @@
+-------------------------------------------------------------------------------
+Test set: tests.core.dao.StockEntryDAOTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.086 s <<< FAILURE! -- in tests.core.dao.StockEntryDAOTest
+tests.core.dao.StockEntryDAOTest.testFindAll -- Time elapsed: 0.010 s <<< ERROR!
+java.lang.ClassCastException: class java.util.Date cannot be cast to class java.sql.Date (java.util.Date is in module java.base of loader 'bootstrap'; java.sql.Date is in module java.sql of loader 'platform')
+	at tests.core.dao.StockEntryDAOTest.testFindAll(StockEntryDAOTest.java:111)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+tests.core.dao.StockEntryDAOTest.testReduceQuantity -- Time elapsed: 0.017 s <<< ERROR!
+org.mockito.exceptions.misusing.UnfinishedStubbingException: 
+
+Unfinished stubbing detected here:
+-> at tests.core.dao.StockEntryDAOTest.testFindAll(StockEntryDAOTest.java:111)
+
+E.g. thenReturn() may be missing.
+Examples of correct stubbing:
+    when(mock.isOk()).thenReturn(true);
+    when(mock.isOk()).thenThrow(exception);
+    doThrow(exception).when(mock).someVoidMethod();
+Hints:
+ 1. missing thenReturn()
+ 2. you are trying to stub a final method, which is not supported
+ 3. you are stubbing the behaviour of another mock inside before 'thenReturn' instruction is completed
+
+	at tests.core.dao.StockEntryDAOTest.testReduceQuantity(StockEntryDAOTest.java:130)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode -- Time elapsed: 0.007 s <<< ERROR!
+java.lang.ClassCastException: class java.util.Date cannot be cast to class java.sql.Date (java.util.Date is in module java.base of loader 'bootstrap'; java.sql.Date is in module java.sql of loader 'platform')
+	at tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode(StockEntryDAOTest.java:154)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode_StockEntryNotFound -- Time elapsed: 0.015 s <<< ERROR!
+org.mockito.exceptions.misusing.UnfinishedStubbingException: 
+
+Unfinished stubbing detected here:
+-> at tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode(StockEntryDAOTest.java:154)
+
+E.g. thenReturn() may be missing.
+Examples of correct stubbing:
+    when(mock.isOk()).thenReturn(true);
+    when(mock.isOk()).thenThrow(exception);
+    doThrow(exception).when(mock).someVoidMethod();
+Hints:
+ 1. missing thenReturn()
+ 2. you are trying to stub a final method, which is not supported
+ 3. you are stubbing the behaviour of another mock inside before 'thenReturn' instruction is completed
+
+	at tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode_StockEntryNotFound(StockEntryDAOTest.java:167)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+

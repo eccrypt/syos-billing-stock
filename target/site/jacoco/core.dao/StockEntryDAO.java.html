@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockEntryDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.dao</a> &gt; <span class="el_source">StockEntryDAO.java</span></div><h1>StockEntryDAO.java</h1><pre class="source lang-java linenums">package core.dao;
+
+import core.models.StockEntry;
+import core.repositories.StockEntryRepository;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class StockEntryDAO implements StockEntryRepository {
+    private final Connection conn;
+
+<span class="fc" id="L14">    public StockEntryDAO(Connection conn) {</span>
+<span class="fc" id="L15">        this.conn = conn;</span>
+<span class="fc" id="L16">    }</span>
+
+    @Override
+    public void insert(StockEntry entry) throws SQLException {
+<span class="fc" id="L20">        String sql = &quot;INSERT INTO stock_entries (item_code, quantity, entry_date, expiry_date) VALUES (?, ?, ?, ?)&quot;;</span>
+<span class="fc" id="L21">        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L22">            stmt.setString(1, entry.getItemCode());</span>
+<span class="fc" id="L23">            stmt.setInt(2, entry.getQuantity());</span>
+<span class="fc" id="L24">            stmt.setDate(3, new java.sql.Date(entry.getEntryDate().getTime()));</span>
+<span class="fc" id="L25">            stmt.setDate(4, new java.sql.Date(entry.getExpiryDate().getTime()));</span>
+<span class="fc" id="L26">            stmt.executeUpdate();</span>
+
+            // Set the generated ID
+<span class="fc" id="L29">            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">                if (generatedKeys.next()) {</span>
+<span class="fc" id="L31">                    entry.setId(generatedKeys.getInt(1));</span>
+                }
+            }
+        }
+<span class="fc" id="L35">    }</span>
+
+    @Override
+    public void update(StockEntry entry) throws SQLException {
+<span class="fc" id="L39">        String sql = &quot;UPDATE stock_entries SET quantity = ?, entry_date = ?, expiry_date = ? WHERE stock_entry_id = ?&quot;;</span>
+<span class="fc" id="L40">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L41">            stmt.setInt(1, entry.getQuantity());</span>
+<span class="fc" id="L42">            stmt.setDate(2, new java.sql.Date(entry.getEntryDate().getTime()));</span>
+<span class="fc" id="L43">            stmt.setDate(3, new java.sql.Date(entry.getExpiryDate().getTime()));</span>
+<span class="fc" id="L44">            stmt.setInt(4, entry.getId());</span>
+<span class="fc" id="L45">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public void delete(StockEntry entry) throws SQLException {
+<span class="fc" id="L51">        String sql = &quot;DELETE FROM stock_entries WHERE stock_entry_id = ?&quot;;</span>
+<span class="fc" id="L52">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L53">            stmt.setInt(1, entry.getId());</span>
+<span class="fc" id="L54">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public List&lt;StockEntry&gt; findAll() throws SQLException {
+<span class="nc" id="L60">        String sql = &quot;SELECT * FROM stock_entries&quot;;</span>
+<span class="nc" id="L61">        List&lt;StockEntry&gt; entries = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L63">        try (PreparedStatement stmt = conn.prepareStatement(sql);</span>
+<span class="nc" id="L64">             ResultSet rs = stmt.executeQuery()) {</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L67">                entries.add(new StockEntry(</span>
+<span class="nc" id="L68">                        rs.getInt(&quot;stock_entry_id&quot;),</span>
+<span class="nc" id="L69">                        rs.getString(&quot;item_code&quot;),</span>
+<span class="nc" id="L70">                        rs.getInt(&quot;quantity&quot;),</span>
+<span class="nc" id="L71">                        rs.getDate(&quot;entry_date&quot;),</span>
+<span class="nc" id="L72">                        rs.getDate(&quot;expiry_date&quot;)</span>
+                ));
+            }
+        }
+<span class="nc" id="L76">        return entries;</span>
+    }
+
+    @Override
+    public List&lt;StockEntry&gt; findAvailableByItemCode(String itemCode) throws SQLException {
+<span class="nc" id="L81">        String sql = &quot;SELECT * FROM stock_entries WHERE item_code = ? AND quantity &gt; 0&quot;;</span>
+<span class="nc" id="L82">        List&lt;StockEntry&gt; entries = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L84">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="nc" id="L85">            stmt.setString(1, itemCode);</span>
+<span class="nc" id="L86">            ResultSet rs = stmt.executeQuery();</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L89">                entries.add(new StockEntry(</span>
+<span class="nc" id="L90">                        rs.getInt(&quot;stock_entry_id&quot;),</span>
+<span class="nc" id="L91">                        rs.getString(&quot;item_code&quot;),</span>
+<span class="nc" id="L92">                        rs.getInt(&quot;quantity&quot;),</span>
+<span class="nc" id="L93">                        rs.getDate(&quot;entry_date&quot;),</span>
+<span class="nc" id="L94">                        rs.getDate(&quot;expiry_date&quot;)</span>
+                ));
+            }
+        }
+
+<span class="nc" id="L99">        return entries;</span>
+    }
+
+    @Override
+    public void reduceQuantity(StockEntry entry, int reduceQty) throws SQLException {
+<span class="nc" id="L104">        String sql = &quot;UPDATE stock_entries SET quantity = quantity - ? WHERE stock_entry_id = ?&quot;;</span>
+<span class="nc" id="L105">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="nc" id="L106">            stmt.setInt(1, reduceQty);</span>
+<span class="nc" id="L107">            stmt.setInt(2, entry.getId());</span>
+<span class="nc" id="L108">            stmt.executeUpdate();</span>
+        }
+<span class="nc" id="L110">    }</span>
+
+    // New method to get StockEntry by item code
+    public StockEntry getStockEntryByItemCode(String itemCode) throws SQLException {
+<span class="nc" id="L114">        String sql = &quot;SELECT * FROM stock_entries WHERE item_code = ?&quot;;</span>
+<span class="nc" id="L115">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="nc" id="L116">            stmt.setString(1, itemCode);</span>
+<span class="nc" id="L117">            ResultSet rs = stmt.executeQuery();</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L120">                return new StockEntry(</span>
+<span class="nc" id="L121">                        rs.getInt(&quot;stock_entry_id&quot;),</span>
+<span class="nc" id="L122">                        rs.getString(&quot;item_code&quot;),</span>
+<span class="nc" id="L123">                        rs.getInt(&quot;quantity&quot;),</span>
+<span class="nc" id="L124">                        rs.getDate(&quot;entry_date&quot;),</span>
+<span class="nc" id="L125">                        rs.getDate(&quot;expiry_date&quot;)</span>
+                );
+            } else {
+<span class="nc" id="L128">                return null; // Return null if no entry is found</span>
+            }
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

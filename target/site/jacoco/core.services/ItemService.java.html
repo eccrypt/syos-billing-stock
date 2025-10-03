@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.services</a> &gt; <span class="el_source">ItemService.java</span></div><h1>ItemService.java</h1><pre class="source lang-java linenums">package core.services;
+
+import core.models.Item;
+import core.models.Shelf;
+import core.repositories.ItemRepository;
+import core.dao.ShelfDAO;  // Assuming ShelfDAO is used by ShelfService
+
+import java.sql.SQLException;
+import java.util.List;
+
+public class ItemService {
+    private final ItemRepository itemRepo;
+    private final ShelfService shelfService;  // Add ShelfService as a dependency
+
+    // Constructor now accepts ShelfService
+<span class="fc" id="L16">    public ItemService(ItemRepository itemRepo, ShelfService shelfService) {</span>
+<span class="fc" id="L17">        this.itemRepo = itemRepo;</span>
+<span class="fc" id="L18">        this.shelfService = shelfService;</span>
+<span class="fc" id="L19">    }</span>
+
+    public Item getItemByCode(String code) throws SQLException {
+<span class="fc" id="L22">        return itemRepo.getItemByCode(code);</span>
+    }
+
+    public List&lt;Item&gt; getAllItems() throws SQLException {
+<span class="nc" id="L26">        return itemRepo.getAllItems();</span>
+    }
+
+    public void addItem(Item item, int shelfDefault, int shelfCurrent) throws SQLException {
+        // Add the item to the database
+<span class="fc" id="L31">        itemRepo.addItem(item);</span>
+
+<span class="fc" id="L33">    }</span>
+
+    public void updateItem(Item item) throws SQLException {
+<span class="fc" id="L36">        itemRepo.updateItem(item);</span>
+<span class="fc" id="L37">    }</span>
+
+    public void updateItemName(String code, String newName) throws SQLException {
+<span class="fc" id="L40">        Item item = itemRepo.getItemByCode(code);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (item != null) {</span>
+<span class="fc" id="L42">            Item updated = new Item(item.getCode(), newName, item.getPrice());</span>
+<span class="fc" id="L43">            itemRepo.updateItem(updated);</span>
+        }
+<span class="fc" id="L45">    }</span>
+
+    public void updateItemPrice(String code, double newPrice) throws SQLException {
+<span class="nc" id="L48">        Item item = itemRepo.getItemByCode(code);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (item != null) {</span>
+<span class="nc" id="L50">            Item updated = new Item(item.getCode(), item.getName(), newPrice);</span>
+<span class="nc" id="L51">            itemRepo.updateItem(updated);</span>
+        }
+<span class="nc" id="L53">    }</span>
+
+    public void deleteItem(String code) throws SQLException {
+<span class="fc" id="L56">        itemRepo.deleteItem(code);</span>
+<span class="fc" id="L57">        shelfService.deleteShelf(code);  // Delete the corresponding shelf using ShelfService</span>
+<span class="fc" id="L58">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

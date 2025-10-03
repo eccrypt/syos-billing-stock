@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BillingServlet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">web.servlets</a> &gt; <span class="el_source">BillingServlet.java</span></div><h1>BillingServlet.java</h1><pre class="source lang-java linenums">package web.servlets;
+
+import core.models.User;
+import core.services.BillingService;
+import core.utils.DatabaseConnectionManager;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+@WebServlet(&quot;/billing&quot;)
+<span class="nc" id="L20">public class BillingServlet extends HttpServlet {</span>
+    private BillingService billingService;
+
+    @Override
+    public void init() throws ServletException {
+        try {
+<span class="nc" id="L26">            Connection conn = DatabaseConnectionManager.getInstance().getConnection();</span>
+<span class="nc" id="L27">            this.billingService = new BillingService(conn);</span>
+<span class="nc" id="L28">        } catch (SQLException e) {</span>
+<span class="nc" id="L29">            throw new ServletException(&quot;Failed to initialize BillingServlet: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L30">        }</span>
+<span class="nc" id="L31">    }</span>
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+<span class="nc" id="L35">        HttpSession session = request.getSession();</span>
+<span class="nc" id="L36">        User user = (User) session.getAttribute(&quot;user&quot;);</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L38">            response.sendRedirect(&quot;index.jsp?error=Please login first&quot;);</span>
+<span class="nc" id="L39">            return;</span>
+        }
+
+<span class="nc" id="L42">        request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L43">    }</span>
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+<span class="nc" id="L47">        HttpSession session = request.getSession();</span>
+<span class="nc" id="L48">        User user = (User) session.getAttribute(&quot;user&quot;);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L50">            response.sendRedirect(&quot;index.jsp?error=Please login first&quot;);</span>
+<span class="nc" id="L51">            return;</span>
+        }
+
+<span class="nc" id="L54">        Map&lt;String, Integer&gt; purchasedItems = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L55">        String[] itemCodes = request.getParameterValues(&quot;itemCode&quot;);</span>
+<span class="nc" id="L56">        String[] quantities = request.getParameterValues(&quot;quantity&quot;);</span>
+
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (itemCodes != null &amp;&amp; quantities != null) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            for (int i = 0; i &lt; itemCodes.length; i++) {</span>
+<span class="nc bnc" id="L60" title="All 4 branches missed.">                if (!itemCodes[i].isEmpty() &amp;&amp; !quantities[i].isEmpty()) {</span>
+                    try {
+<span class="nc" id="L62">                        int qty = Integer.parseInt(quantities[i]);</span>
+<span class="nc" id="L63">                        purchasedItems.put(itemCodes[i], purchasedItems.getOrDefault(itemCodes[i], 0) + qty);</span>
+<span class="nc" id="L64">                    } catch (NumberFormatException e) {</span>
+<span class="nc" id="L65">                        request.setAttribute(&quot;error&quot;, &quot;Invalid quantity for item: &quot; + itemCodes[i]);</span>
+<span class="nc" id="L66">                        request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L67">                        return;</span>
+<span class="nc" id="L68">                    }</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (purchasedItems.isEmpty()) {</span>
+<span class="nc" id="L74">            request.setAttribute(&quot;error&quot;, &quot;No items added to bill&quot;);</span>
+<span class="nc" id="L75">            request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L76">            return;</span>
+        }
+
+<span class="nc" id="L79">        String cashStr = request.getParameter(&quot;cash&quot;);</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        if (cashStr == null || cashStr.isEmpty()) {</span>
+<span class="nc" id="L81">            request.setAttribute(&quot;error&quot;, &quot;Cash tendered is required&quot;);</span>
+<span class="nc" id="L82">            request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L83">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L87">            double cash = Double.parseDouble(cashStr);</span>
+<span class="nc" id="L88">            double total = billingService.calculateTotal(purchasedItems);</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (cash &lt; total) {</span>
+<span class="nc" id="L91">                request.setAttribute(&quot;error&quot;, &quot;Cash tendered is less than total amount&quot;);</span>
+<span class="nc" id="L92">                request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L93">                return;</span>
+            }
+
+<span class="nc" id="L96">            billingService.createBill(purchasedItems, cash);</span>
+<span class="nc" id="L97">            request.setAttribute(&quot;success&quot;, &quot;Bill generated successfully! Total: &quot; + total + &quot;, Change: &quot; + (cash - total));</span>
+<span class="nc" id="L98">            request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+
+<span class="nc" id="L100">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L101">            request.setAttribute(&quot;error&quot;, &quot;Invalid cash amount&quot;);</span>
+<span class="nc" id="L102">            request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L103">        } catch (SQLException e) {</span>
+<span class="nc" id="L104">            request.setAttribute(&quot;error&quot;, &quot;Database error: &quot; + e.getMessage());</span>
+<span class="nc" id="L105">            request.getRequestDispatcher(&quot;/billing.jsp&quot;).forward(request, response);</span>
+<span class="nc" id="L106">        }</span>
+<span class="nc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

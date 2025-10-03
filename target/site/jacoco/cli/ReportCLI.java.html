@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportCLI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">cli</a> &gt; <span class="el_source">ReportCLI.java</span></div><h1>ReportCLI.java</h1><pre class="source lang-java linenums">// === PRODUCTION VERSION ===
+package cli;
+
+import cli.menus.StockCLIHandler;
+import core.command.Command;
+import core.command.GenerateReportCommand;
+import core.command.ReportInvoker;
+import core.dao.BillDAO;
+import core.dao.ItemDAO;
+import core.dao.ShelfDAO;
+import core.models.User;
+import core.observer.ReorderNotifier;
+import core.report.*;
+import core.services.ItemService;
+import core.services.ShelfService;
+import core.services.StockService;
+
+import java.sql.Connection;
+import java.time.LocalDate;
+import java.util.Scanner;
+
+public class ReportCLI {
+    private final Scanner sc;
+    private final Connection connection;
+    private final BillDAO billDAO;
+    private final StockService stockService;
+    private final ItemService itemService;
+    private final ShelfService shelfService;
+    private final ReorderNotifier reorderNotifier;
+    private final boolean isTest;
+
+    // === Constructor for production ===
+<span class="nc" id="L33">    public ReportCLI(Scanner sc, Connection connection) {</span>
+<span class="nc" id="L34">        this.sc = sc;</span>
+<span class="nc" id="L35">        this.connection = connection;</span>
+<span class="nc" id="L36">        this.shelfService = new ShelfService(new ShelfDAO(connection));</span>
+<span class="nc" id="L37">        this.itemService = new ItemService(new ItemDAO(connection), shelfService);</span>
+<span class="nc" id="L38">        this.reorderNotifier = new ReorderNotifier(itemService);</span>
+<span class="nc" id="L39">        this.stockService = new StockService(connection, itemService, shelfService);</span>
+<span class="nc" id="L40">        this.stockService.registerObserver(reorderNotifier);</span>
+<span class="nc" id="L41">        this.billDAO = new BillDAO(connection);</span>
+<span class="nc" id="L42">        this.isTest = false;</span>
+<span class="nc" id="L43">    }</span>
+
+    // === Constructor for testing ===
+    public ReportCLI(Scanner sc, Connection connection,
+                     BillDAO billDAO,
+                     StockService stockService,
+                     ItemService itemService,
+                     ShelfService shelfService,
+<span class="fc" id="L51">                     ReorderNotifier reorderNotifier) {</span>
+<span class="fc" id="L52">        this.sc = sc;</span>
+<span class="fc" id="L53">        this.connection = connection;</span>
+<span class="fc" id="L54">        this.billDAO = billDAO;</span>
+<span class="fc" id="L55">        this.stockService = stockService;</span>
+<span class="fc" id="L56">        this.itemService = itemService;</span>
+<span class="fc" id="L57">        this.shelfService = shelfService;</span>
+<span class="fc" id="L58">        this.reorderNotifier = reorderNotifier;</span>
+<span class="fc" id="L59">        this.isTest = true;</span>
+<span class="fc" id="L60">    }</span>
+
+    public void showMenu(User user) {
+        while (true) {
+<span class="fc" id="L64">            System.out.println(&quot;\n=== Reports Menu ===&quot;);</span>
+<span class="fc" id="L65">            System.out.println(&quot;1. Reorder Level Report&quot;);</span>
+<span class="fc" id="L66">            System.out.println(&quot;2. Daily Sales Report&quot;);</span>
+<span class="fc" id="L67">            System.out.println(&quot;3. Stock Report&quot;);</span>
+<span class="fc" id="L68">            System.out.println(&quot;4. Bill Report&quot;);</span>
+<span class="fc" id="L69">            System.out.println(&quot;5. Generate All Reports&quot;);</span>
+<span class="fc" id="L70">            System.out.println(&quot;0. Back&quot;);</span>
+
+<span class="fc" id="L72">            String choice = sc.nextLine();</span>
+
+<span class="pc bpc" id="L74" title="1 of 7 branches missed.">            switch (choice) {</span>
+<span class="fc" id="L75">                case &quot;1&quot; -&gt; generateReorderReport();</span>
+<span class="fc" id="L76">                case &quot;2&quot; -&gt; generateDailySalesReport();</span>
+<span class="fc" id="L77">                case &quot;3&quot; -&gt; generateStockReport();</span>
+<span class="fc" id="L78">                case &quot;4&quot; -&gt; generateBillReport();</span>
+<span class="fc" id="L79">                case &quot;5&quot; -&gt; generateAllReports();</span>
+                case &quot;0&quot; -&gt; {
+<span class="fc" id="L81">                    return;</span>
+                }
+<span class="nc" id="L83">                default -&gt; System.out.println(&quot;Invalid choice. Try again.&quot;);</span>
+            }
+
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">            if (isTest) break;</span>
+<span class="nc" id="L87">        }</span>
+<span class="fc" id="L88">    }</span>
+
+    private void generateReorderReport() {
+        try {
+<span class="fc" id="L92">            ReportTemplate report = new ReorderReport(reorderNotifier, itemService);</span>
+<span class="fc" id="L93">            new GenerateReportCommand(report).execute();</span>
+<span class="nc" id="L94">        } catch (Exception e) {</span>
+<span class="nc" id="L95">            System.out.println(&quot;❌ Failed to generate reorder report: &quot; + e.getMessage());</span>
+<span class="fc" id="L96">        }</span>
+<span class="fc" id="L97">    }</span>
+
+    private void generateDailySalesReport() {
+        try {
+<span class="fc" id="L101">            System.out.print(&quot;📅 Enter date for report (YYYY-MM-DD): &quot;);</span>
+<span class="fc" id="L102">            LocalDate date = LocalDate.parse(sc.nextLine());</span>
+<span class="fc" id="L103">            ReportTemplate report = new DailySalesReporter(billDAO, date);</span>
+<span class="fc" id="L104">            new GenerateReportCommand(report).execute();</span>
+<span class="nc" id="L105">        } catch (Exception e) {</span>
+<span class="nc" id="L106">            System.out.println(&quot;❌ Failed to generate daily sales report: &quot; + e.getMessage());</span>
+<span class="fc" id="L107">        }</span>
+<span class="fc" id="L108">    }</span>
+
+    private void generateStockReport() {
+        try {
+<span class="fc" id="L112">            ReportTemplate report = new StockReport(stockService);</span>
+<span class="fc" id="L113">            new GenerateReportCommand(report).execute();</span>
+<span class="nc" id="L114">        } catch (Exception e) {</span>
+<span class="nc" id="L115">            System.out.println(&quot;❌ Failed to generate stock report: &quot; + e.getMessage());</span>
+<span class="fc" id="L116">        }</span>
+<span class="fc" id="L117">    }</span>
+
+    private void generateBillReport() {
+        try {
+<span class="fc" id="L121">            System.out.print(&quot;📅 Enter date for bill report (YYYY-MM-DD): &quot;);</span>
+<span class="fc" id="L122">            LocalDate date = LocalDate.parse(sc.nextLine());</span>
+<span class="fc" id="L123">            ReportTemplate report = new BillReport(billDAO, date);</span>
+<span class="fc" id="L124">            new GenerateReportCommand(report).execute();</span>
+<span class="nc" id="L125">        } catch (Exception e) {</span>
+<span class="nc" id="L126">            System.out.println(&quot;❌ Failed to generate bill report: &quot; + e.getMessage());</span>
+<span class="fc" id="L127">        }</span>
+<span class="fc" id="L128">    }</span>
+
+    private void generateAllReports() {
+        try {
+<span class="fc" id="L132">            System.out.print(&quot;📅 Enter date for sales and bill reports (YYYY-MM-DD): &quot;);</span>
+<span class="fc" id="L133">            LocalDate date = LocalDate.parse(sc.nextLine());</span>
+<span class="fc" id="L134">            ReportInvoker invoker = new ReportInvoker();</span>
+<span class="fc" id="L135">            invoker.addCommand(new GenerateReportCommand(new ReorderReport(reorderNotifier, itemService)));</span>
+<span class="fc" id="L136">            invoker.addCommand(new GenerateReportCommand(new DailySalesReporter(billDAO, date)));</span>
+<span class="fc" id="L137">            invoker.addCommand(new GenerateReportCommand(new StockReport(stockService)));</span>
+<span class="fc" id="L138">            invoker.addCommand(new GenerateReportCommand(new BillReport(billDAO, date)));</span>
+<span class="fc" id="L139">            invoker.runCommands();</span>
+<span class="nc" id="L140">        } catch (Exception e) {</span>
+<span class="nc" id="L141">            System.out.println(&quot;❌ Failed to generate all reports: &quot; + e.getMessage());</span>
+<span class="fc" id="L142">        }</span>
+<span class="fc" id="L143">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

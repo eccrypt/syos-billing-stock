@@ -1,71 +1,74 @@
-D:\syos-directory-clone\src\main\java\core\models\Customer.java
-D:\syos-directory-clone\src\main\java\core\observer\StockSubject.java
-D:\syos-directory-clone\src\main\java\core\report\ReorderReport.java
-D:\syos-directory-clone\src\main\java\core\billing\BillDecorator.java
-D:\syos-directory-clone\src\main\java\core\dao\StockEntryDAO.java
-D:\syos-directory-clone\src\main\java\core\security\InventoryManagerProxy.java
-D:\syos-directory-clone\src\main\java\core\report\StockReport.java
-D:\syos-directory-clone\src\main\java\core\utils\TaskExecutor.java
-D:\syos-directory-clone\src\main\java\core\facade\StockFacade.java
-D:\syos-directory-clone\src\main\java\core\utils\DateUtil.java
-D:\syos-directory-clone\src\main\java\core\services\BillingService.java
-D:\syos-directory-clone\src\main\java\core\services\ShelfService.java
-D:\syos-directory-clone\src\main\java\cli\EmployeeCLI.java
-D:\syos-directory-clone\src\main\java\core\services\ItemService.java
-D:\syos-directory-clone\src\main\java\cli\StockCLI.java
-D:\syos-directory-clone\src\main\java\cli\ApplicationCLI.java
-D:\syos-directory-clone\src\main\java\core\models\Admin.java
-D:\syos-directory-clone\src\main\java\core\dao\UserDAO.java
-D:\syos-directory-clone\src\main\java\core\observer\StockObserver.java
-D:\syos-directory-clone\src\main\java\core\repositories\StockEntryRepository.java
-D:\syos-directory-clone\src\main\java\core\dao\BillDAO.java
-D:\syos-directory-clone\src\main\java\core\userfactory\UserFactory.java
-D:\syos-directory-clone\src\main\java\core\models\Employee.java
-D:\syos-directory-clone\src\main\java\core\command\Command.java
-D:\syos-directory-clone\src\main\java\cli\ReportCLI.java
-D:\syos-directory-clone\src\main\java\core\billing\BasicBill.java
-D:\syos-directory-clone\src\main\java\core\command\ReportInvoker.java
-D:\syos-directory-clone\src\main\java\core\report\ReportTemplate.java
-D:\syos-directory-clone\src\main\java\core\repositories\ItemRepository.java
-D:\syos-directory-clone\src\main\java\web\servlets\AuthenticationServlet.java
-D:\syos-directory-clone\src\main\java\core\discount\SeasonalDiscount.java
-D:\syos-directory-clone\src\main\java\core\billing\BillBuilder.java
-D:\syos-directory-clone\src\main\java\core\services\AuthenticationService.java
-D:\syos-directory-clone\src\main\java\core\discount\BulkPurchaseDiscount.java
-D:\syos-directory-clone\src\main\java\core\discount\DiscountContext.java
-D:\syos-directory-clone\src\main\java\core\utils\SerialNumberGenerator.java
-D:\syos-directory-clone\src\main\java\core\models\Item.java
-D:\syos-directory-clone\src\main\java\core\observer\ReorderNotifier.java
-D:\syos-directory-clone\src\main\java\cli\AuthenticationCLI.java
-D:\syos-directory-clone\src\main\java\core\models\StockEntry.java
-D:\syos-directory-clone\src\main\java\cli\MainCLI.java
-D:\syos-directory-clone\src\main\java\core\utils\DatabaseConnectionManager.java
-D:\syos-directory-clone\src\main\java\cli\menus\StockCLIHandler.java
-D:\syos-directory-clone\src\main\java\core\billing\FooterBill.java
-D:\syos-directory-clone\src\main\java\core\discount\DiscountHandler.java
-D:\syos-directory-clone\src\main\java\cli\ItemCLI.java
-D:\syos-directory-clone\src\main\java\core\models\Bill.java
-D:\syos-directory-clone\src\main\java\cli\menus\ItemCLIHandler.java
-D:\syos-directory-clone\src\main\java\core\dao\BillItemDAO.java
-D:\syos-directory-clone\src\main\java\core\dao\ItemDAO.java
-D:\syos-directory-clone\src\main\java\core\repositories\ShelfRepository.java
-D:\syos-directory-clone\src\main\java\core\billing\DiscountedBill.java
-D:\syos-directory-clone\src\main\java\core\dao\ShelfDAO.java
-D:\syos-directory-clone\src\main\java\core\models\Shelf.java
-D:\syos-directory-clone\src\main\java\core\strategy\stock\StockAllocator.java
-D:\syos-directory-clone\src\main\java\core\command\GenerateReportCommand.java
-D:\syos-directory-clone\src\main\java\core\models\User.java
-D:\syos-directory-clone\src\main\java\core\report\BillReport.java
-D:\syos-directory-clone\src\main\java\core\models\BillItem.java
-D:\syos-directory-clone\src\main\java\core\services\StockService.java
-D:\syos-directory-clone\src\main\java\web\servlets\BillingServlet.java
-D:\syos-directory-clone\src\main\java\core\discount\DiscountResult.java
-D:\syos-directory-clone\src\main\java\core\utils\LockManager.java
-D:\syos-directory-clone\src\main\java\cli\BillingCLI.java
-D:\syos-directory-clone\src\main\java\core\report\DailySalesReporter.java
-D:\syos-directory-clone\src\main\java\core\discount\BaseDiscountHandler.java
-D:\syos-directory-clone\src\main\java\core\strategy\stock\StockSelectionStrategy.java
-D:\syos-directory-clone\src\main\java\core\utils\EncryptionUtil.java
-D:\syos-directory-clone\src\main\java\web\websockets\InventorySocket.java
-D:\syos-directory-clone\src\main\java\core\discount\NoDiscount.java
-D:\syos-directory-clone\src\main\java\core\strategy\stock\ExpiryAwareStockSelectionStrategy.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Shelf.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\servlets\AuthenticationServlet.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\security\InventoryManagerProxy.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Customer.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\ApplicationCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\billing\FooterBill.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\SerialNumberGenerator.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\repositories\ItemRepository.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\menus\ItemCLIHandler.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\billing\BillBuilder.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\ShelfDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\StockCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\StockEntryDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\servlets\StockServlet.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\report\DailySalesReporter.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Bill.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\repositories\ShelfRepository.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\services\AuthenticationService.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\billing\BasicBill.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\services\ItemService.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\strategy\stock\StockAllocator.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\BulkPurchaseDiscount.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\EncryptionUtil.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\servlets\ReportServlet.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\SeasonalDiscount.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\repositories\StockEntryRepository.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\services\BillingService.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\strategy\stock\ExpiryAwareStockSelectionStrategy.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\userfactory\UserFactory.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\observer\StockSubject.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\menus\StockCLIHandler.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\billing\BillDecorator.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\billing\DiscountedBill.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\observer\StockObserver.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\report\StockReport.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\UserDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\DateUtil.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\observer\ReorderNotifier.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\DiscountHandler.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\TaskExecutor.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\BillingCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\StockEntry.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\DatabaseConnectionManager.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\command\GenerateReportCommand.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\User.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\DiscountContext.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Admin.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\servlets\BillingServlet.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\command\Command.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Employee.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\DiscountResult.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\EmployeeCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\ItemCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\NoDiscount.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\services\ShelfService.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\services\StockService.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\Item.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\websockets\InventorySocket.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\discount\BaseDiscountHandler.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\utils\LockManager.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\strategy\stock\StockSelectionStrategy.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\report\ReportTemplate.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\command\ReportInvoker.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\ReportCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\BillItemDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\facade\StockFacade.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\MainCLI.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\report\BillReport.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\ItemDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\dao\BillDAO.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\report\ReorderReport.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\core\models\BillItem.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\web\servlets\ItemServlet.java
+c:\Users\rumai\OneDrive\Desktop\sumar syos\syos-billing-stock\src\main\java\cli\AuthenticationCLI.java

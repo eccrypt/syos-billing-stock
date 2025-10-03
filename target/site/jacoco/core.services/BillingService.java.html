@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BillingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.services</a> &gt; <span class="el_source">BillingService.java</span></div><h1>BillingService.java</h1><pre class="source lang-java linenums">package core.services;
+
+import core.billing.BasicBill;
+import core.billing.BillBuilder;
+import core.dao.BillDAO;
+import core.dao.BillItemDAO;
+import core.dao.ItemDAO;
+import core.dao.ShelfDAO;
+import core.models.*;
+import core.discount.DiscountContext;
+import core.discount.DiscountResult;
+import core.utils.SerialNumberGenerator;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class BillingService {
+    private final ItemService itemService;
+    private final BillDAO billDAO;
+    private final BillItemDAO billItemDAO;
+    private final StockService stockService;
+    private final DiscountContext discountContext;
+
+<span class="fc" id="L27">    public BillingService(Connection conn) {</span>
+<span class="fc" id="L28">        ShelfService shelfService = new ShelfService(new ShelfDAO(conn));</span>
+
+        // Create ItemService instance and pass both ItemDAO and ShelfService
+<span class="fc" id="L31">        this.itemService = new ItemService(new ItemDAO(conn), shelfService);</span>
+<span class="fc" id="L32">        this.billDAO = new BillDAO(conn);</span>
+<span class="fc" id="L33">        this.billItemDAO = new BillItemDAO(conn);</span>
+
+        // Create StockService, passing the ShelfService along with ItemService
+<span class="fc" id="L36">        this.stockService = new StockService(conn, itemService, shelfService);  // Pass ShelfService here</span>
+
+<span class="fc" id="L38">        this.discountContext = new DiscountContext();</span>
+<span class="fc" id="L39">    }</span>
+
+    // Test constructor
+    public BillingService(ItemService itemService, BillDAO billDAO, BillItemDAO billItemDAO,
+<span class="fc" id="L43">                          StockService stockService, DiscountContext discountContext) {</span>
+<span class="fc" id="L44">        this.itemService = itemService;</span>
+<span class="fc" id="L45">        this.billDAO = billDAO;</span>
+<span class="fc" id="L46">        this.billItemDAO = billItemDAO;</span>
+<span class="fc" id="L47">        this.stockService = stockService;</span>
+<span class="fc" id="L48">        this.discountContext = discountContext;</span>
+<span class="fc" id="L49">    }</span>
+
+    public double calculateTotal(Map&lt;String, Integer&gt; purchasedItems) throws SQLException {
+<span class="fc" id="L52">        double total = 0;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (Map.Entry&lt;String, Integer&gt; entry : purchasedItems.entrySet()) {</span>
+<span class="fc" id="L54">            Item item = itemService.getItemByCode(entry.getKey());</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (item == null) {</span>
+<span class="nc" id="L56">                throw new SQLException(&quot;Item not found: &quot; + entry.getKey());</span>
+            }
+<span class="fc" id="L58">            total += item.getPrice() * entry.getValue();</span>
+<span class="fc" id="L59">        }</span>
+<span class="fc" id="L60">        return total;</span>
+    }
+
+    public void createBill(Map&lt;String, Integer&gt; purchasedItems, double cashTendered) throws SQLException {
+<span class="fc" id="L64">        List&lt;BillItem&gt; billItems = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L65">        double total = 0;</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (Map.Entry&lt;String, Integer&gt; entry : purchasedItems.entrySet()) {</span>
+<span class="fc" id="L68">            String itemCode = entry.getKey();</span>
+<span class="fc" id="L69">            int quantityNeeded = entry.getValue();</span>
+
+<span class="fc" id="L71">            Item item = itemService.getItemByCode(itemCode);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">            if (item == null) throw new SQLException(&quot;Item not found: &quot; + itemCode);</span>
+
+<span class="fc" id="L74">            double itemTotal = item.getPrice() * quantityNeeded;</span>
+<span class="fc" id="L75">            total += itemTotal;</span>
+
+            // Check if there's enough stock in the shelf
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            if (!checkShelfStock(itemCode, quantityNeeded)) {</span>
+<span class="nc" id="L79">                throw new SQLException(&quot;❌ Insufficient stock in shelf for item: &quot; + itemCode);</span>
+            }
+
+<span class="fc" id="L82">            billItems.add(new BillItem(item.getCode(), item.getName(), quantityNeeded, itemTotal));</span>
+
+            // **Reduce the shelf's stock after the bill is created**
+<span class="fc" id="L85">            reduceShelfStock(itemCode, quantityNeeded);  // Adjust shelf quantity after purchase</span>
+<span class="fc" id="L86">        }</span>
+
+        // Apply discount chain
+<span class="fc" id="L89">        Bill tempBill = new BasicBill(total, 0, cashTendered, 0, billItems, 0);  // temporary bill for context</span>
+<span class="fc" id="L90">        DiscountResult discountResult = discountContext.applyDiscounts(tempBill, total);</span>
+
+<span class="fc" id="L92">        double discount = total - discountResult.getTotalAfterDiscount();</span>
+<span class="fc" id="L93">        double netTotal = discountResult.getTotalAfterDiscount();</span>
+<span class="fc" id="L94">        double change = cashTendered - netTotal;</span>
+<span class="fc" id="L95">        int serialNumber = SerialNumberGenerator.getNextSerial();</span>
+
+<span class="fc" id="L97">        Bill decoratedBill = BillBuilder.build(total, discount, cashTendered, change, billItems, serialNumber);</span>
+<span class="fc" id="L98">        System.out.println(decoratedBill.print());</span>
+
+<span class="fc" id="L100">        Bill billToSave = new BasicBill(total, discount, cashTendered, change, billItems, serialNumber);</span>
+<span class="fc" id="L101">        billToSave.setSerialNumber(serialNumber);</span>
+
+<span class="fc" id="L103">        int billId = billDAO.saveBill(billToSave);</span>
+<span class="fc" id="L104">        billItemDAO.saveBillItems(billId, billItems);</span>
+
+<span class="fc" id="L106">        System.out.println(&quot;✅ Discount applied: &quot; + discountResult.getDiscountName());</span>
+<span class="fc" id="L107">        System.out.println(&quot;Total after discount: &quot; + netTotal);</span>
+<span class="fc" id="L108">        System.out.println(&quot;Change due: &quot; + change);</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * Check if the shelf has enough stock for the requested quantity.
+     */
+    private boolean checkShelfStock(String itemCode, int quantityNeeded) throws SQLException {
+<span class="fc" id="L115">        Shelf shelf = stockService.getShelfService().getShelfByProductCode(itemCode);</span>
+
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (shelf == null) {</span>
+<span class="nc" id="L118">            System.out.println(&quot;⚠️ Shelf not found for item code: &quot; + itemCode);</span>
+<span class="nc" id="L119">            return false;</span>
+        }
+
+<span class="fc" id="L122">        int shelfCurrent = shelf.getShelfCurrent();</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        return shelfCurrent &gt;= quantityNeeded;</span>
+    }
+
+    /**
+     * Reduce the shelf's stock based on the quantity purchased.
+     */
+    private void reduceShelfStock(String itemCode, int quantityNeeded) throws SQLException {
+<span class="fc" id="L130">        Shelf shelf = stockService.getShelfService().getShelfByProductCode(itemCode);</span>
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (shelf != null) {</span>
+            // Reduce shelf's current stock by quantity purchased
+<span class="fc" id="L134">            int updatedQuantity = shelf.getShelfCurrent() - quantityNeeded;</span>
+
+            // Update the shelf's current quantity
+<span class="fc" id="L137">            shelf.setShelfCurrent(updatedQuantity);</span>
+<span class="fc" id="L138">            stockService.getShelfService().updateShelf(shelf);  // Update in the database</span>
+<span class="fc" id="L139">            System.out.println(&quot;✅ Shelf quantity updated: Current quantity is now &quot; + updatedQuantity + &quot;for &quot; + itemCode);</span>
+
+            // Check if the shelf quantity is below a certain threshold (e.g., 10 units)
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">            if (updatedQuantity &lt; 10) {</span>
+                // Refill the shelf from the available stock based on the nearest expiry batch
+<span class="fc" id="L144">                refillShelf(itemCode, updatedQuantity);</span>
+            }
+<span class="fc" id="L146">        } else {</span>
+<span class="nc" id="L147">            System.out.println(&quot;⚠️ Shelf not found for item code: &quot; + itemCode);</span>
+        }
+<span class="fc" id="L149">    }</span>
+
+    /**
+     * Refill the shelf from the stock based on the nearest expiry batch.
+     */
+    private void refillShelf(String itemCode, int shelfQuantity) throws SQLException {
+<span class="fc" id="L155">        Shelf shelf = stockService.getShelfService().getShelfByProductCode(itemCode);</span>
+<span class="fc" id="L156">        int quantityToRefill = shelf.getShelfDefault() - shelfQuantity;</span>
+
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (quantityToRefill &gt; 0) {</span>
+            // Allocate stock from the available stock entries based on expiry date priority
+<span class="fc" id="L160">            List&lt;StockEntry&gt; allocated = stockService.allocateStock(itemCode, quantityToRefill);</span>
+
+            // Add the allocated stock to the shelf
+<span class="fc" id="L163">            int allocatedQuantity = allocated.stream().mapToInt(StockEntry::getQuantity).sum();</span>
+
+            // Update the shelf current value after refilling
+<span class="fc" id="L166">            shelf.setShelfCurrent(shelfQuantity + allocatedQuantity);</span>
+<span class="fc" id="L167">            stockService.getShelfService().updateShelf(shelf);</span>
+
+<span class="fc" id="L169">            System.out.println(&quot;✅ Shelf refilled: Current quantity is now &quot; + shelf.getShelfCurrent());</span>
+        }
+<span class="fc" id="L171">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

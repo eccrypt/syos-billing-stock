@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShelfDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.dao</a> &gt; <span class="el_source">ShelfDAO.java</span></div><h1>ShelfDAO.java</h1><pre class="source lang-java linenums">package core.dao;
+
+import core.models.Shelf;
+import core.repositories.ShelfRepository;
+
+import java.sql.*;
+
+public class ShelfDAO implements ShelfRepository {
+    private final Connection conn;
+
+<span class="fc" id="L11">    public ShelfDAO(Connection conn) {</span>
+<span class="fc" id="L12">        this.conn = conn;</span>
+<span class="fc" id="L13">    }</span>
+
+    @Override
+    public void addShelf(Shelf shelf) throws SQLException {
+<span class="fc" id="L17">        String sql = &quot;INSERT INTO shelves (product_code, shelf_default, shelf_current) VALUES (?, ?, ?)&quot;;</span>
+
+<span class="fc" id="L19">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L20">            stmt.setString(1, shelf.getProductCode());</span>
+<span class="fc" id="L21">            stmt.setInt(2, shelf.getShelfDefault());</span>
+<span class="fc" id="L22">            stmt.setInt(3, shelf.getShelfCurrent());</span>
+<span class="fc" id="L23">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L25">    }</span>
+
+    @Override
+    public Shelf getShelfByProductCode(String productCode) throws SQLException {
+<span class="fc" id="L29">        String sql = &quot;SELECT * FROM shelves WHERE product_code = ?&quot;;</span>
+
+<span class="fc" id="L31">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L32">            stmt.setString(1, productCode);</span>
+<span class="fc" id="L33">            ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            if (rs.next()) {</span>
+<span class="fc" id="L35">                return new Shelf(</span>
+<span class="fc" id="L36">                        rs.getInt(&quot;shelf_id&quot;),</span>
+<span class="fc" id="L37">                        rs.getString(&quot;product_code&quot;),</span>
+<span class="fc" id="L38">                        rs.getInt(&quot;shelf_default&quot;),</span>
+<span class="fc" id="L39">                        rs.getInt(&quot;shelf_current&quot;)</span>
+                );
+            }
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        }</span>
+<span class="fc" id="L43">        return null;  // No shelf found</span>
+    }
+
+    @Override
+    public void updateShelf(Shelf shelf) throws SQLException {
+<span class="fc" id="L48">        String sql = &quot;UPDATE shelves SET shelf_default = ?, shelf_current = ? WHERE product_code = ?&quot;;</span>
+
+<span class="fc" id="L50">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L51">            stmt.setInt(1, shelf.getShelfDefault());</span>
+<span class="fc" id="L52">            stmt.setInt(2, shelf.getShelfCurrent());</span>
+<span class="fc" id="L53">            stmt.setString(3, shelf.getProductCode());</span>
+<span class="fc" id="L54">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public void deleteShelf(String productCode) throws SQLException {
+<span class="fc" id="L60">        String sql = &quot;DELETE FROM shelves WHERE product_code = ?&quot;;</span>
+
+<span class="fc" id="L62">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L63">            stmt.setString(1, productCode);</span>
+<span class="fc" id="L64">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L66">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

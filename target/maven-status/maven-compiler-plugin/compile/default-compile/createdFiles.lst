@@ -21,9 +21,12 @@ core\discount\DiscountHandler.class
 core\utils\SerialNumberGenerator.class
 cli\MainCLI.class
 core\models\User.class
+web\servlets\ReportServlet.class
 core\discount\BaseDiscountHandler.class
+web\servlets\ItemServlet.class
 cli\ApplicationCLI.class
 core\models\Customer.class
+web\servlets\StockServlet.class
 core\models\Admin.class
 core\utils\DateUtil.class
 core\dao\UserDAO.class

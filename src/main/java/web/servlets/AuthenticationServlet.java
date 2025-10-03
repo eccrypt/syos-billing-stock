@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -69,19 +70,19 @@ public class AuthenticationServlet extends HttpServlet {
 
         TaskExecutor.submit(() -> {
             try {
-                PrintWriter out = resp.getWriter();
                 boolean success = authService.registerUser(username, role, password);
                 if (success) {
-                    resp.setStatus(HttpServletResponse.SC_CREATED);
-                    out.write("{\"message\":\"User registered successfully\"}");
+                    resp.sendRedirect("../index.jsp?message=Registration successful");
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                    out.write("{\"error\":\"Username already exists\"}");
+                    resp.sendRedirect("../index.jsp?error=Username already exists");
                 }
-                out.flush();
             } catch (Exception e) {
                 e.printStackTrace();
-                sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server error during registration");
+                try {
+                    resp.sendRedirect("../index.jsp?error=Server error during registration");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             } finally {
                 asyncContext.complete();
             }
@@ -97,19 +98,21 @@ public class AuthenticationServlet extends HttpServlet {
 
         TaskExecutor.submit(() -> {
             try {
-                PrintWriter out = resp.getWriter();
                 User user = authService.login(username, password);
                 if (user != null) {
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    out.write("{\"message\":\"Login successful\",\"role\":\"" + user.getRole() + "\"}");
+                    HttpSession session = req.getSession();
+                    session.setAttribute("user", user);
+                    resp.sendRedirect("../dashboard.jsp");
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    out.write("{\"error\":\"Invalid username or password\"}");
+                    resp.sendRedirect("../index.jsp?error=Invalid username or password");
                 }
-                out.flush();
             } catch (Exception e) {
                 e.printStackTrace();
-                sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server error during login");
+                try {
+                    resp.sendRedirect("../index.jsp?error=Server error during login");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
             } finally {
                 asyncContext.complete();
             }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmployeeCLI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">cli</a> &gt; <span class="el_source">EmployeeCLI.java</span></div><h1>EmployeeCLI.java</h1><pre class="source lang-java linenums">package cli;
+
+import core.dao.ItemDAO;
+import core.dao.ShelfDAO;
+import core.models.User;
+import core.services.ItemService;
+import core.services.ShelfService;
+import core.services.StockService;
+import core.facade.StockFacade;
+import core.observer.ReorderNotifier;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.Scanner;
+
+public class EmployeeCLI {
+    private final Scanner sc;
+    private final Connection connection;
+    private final ItemCLI injectedItemCLI; // Optional injected CLI (for testing)
+
+    // Production constructor
+<span class="fc" id="L23">    public EmployeeCLI(Scanner sc, Connection connection) {</span>
+<span class="fc" id="L24">        this.sc = sc;</span>
+<span class="fc" id="L25">        this.connection = connection;</span>
+<span class="fc" id="L26">        this.injectedItemCLI = null;</span>
+<span class="fc" id="L27">    }</span>
+
+    // Test constructor (optional ItemCLI injection)
+<span class="fc" id="L30">    public EmployeeCLI(Scanner sc, Connection connection, ItemCLI injectedItemCLI) {</span>
+<span class="fc" id="L31">        this.sc = sc;</span>
+<span class="fc" id="L32">        this.connection = connection;</span>
+<span class="fc" id="L33">        this.injectedItemCLI = injectedItemCLI;</span>
+<span class="fc" id="L34">    }</span>
+
+    public void menu(User user) throws SQLException, ParseException {
+        while (true) {
+<span class="fc" id="L38">            System.out.println(&quot;\n=== Employee Menu ===&quot;);</span>
+<span class="fc" id="L39">            System.out.println(&quot;1. Billing&quot;);</span>
+<span class="fc" id="L40">            System.out.println(&quot;2. Stock Management&quot;);</span>
+<span class="fc" id="L41">            System.out.println(&quot;3. Item Management&quot;);</span>
+<span class="fc" id="L42">            System.out.println(&quot;4. Generate Report&quot;);</span>
+<span class="fc" id="L43">            System.out.println(&quot;0. Logout&quot;);</span>
+
+<span class="fc" id="L45">            String choice = sc.nextLine();</span>
+
+<span class="pc bpc" id="L47" title="3 of 6 branches missed.">            switch (choice) {</span>
+<span class="nc" id="L48">                case &quot;1&quot; -&gt; new BillingCLI(user, connection).startBilling();</span>
+<span class="nc" id="L49">                case &quot;2&quot; -&gt; new StockCLI(connection).showMenu();</span>
+                case &quot;3&quot; -&gt; {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                    if (injectedItemCLI != null) {</span>
+<span class="fc" id="L52">                        injectedItemCLI.start(); // Use mock in tests</span>
+                    } else {
+                        // Normal execution
+<span class="nc" id="L55">                        ShelfService shelfService = new ShelfService(new ShelfDAO(connection));</span>
+<span class="nc" id="L56">                        ItemService itemService = new ItemService(new ItemDAO(connection), shelfService);</span>
+<span class="nc" id="L57">                        StockService stockService = new StockService(connection, itemService, shelfService);</span>
+<span class="nc" id="L58">                        ReorderNotifier reorderNotifier = new ReorderNotifier(itemService);</span>
+<span class="nc" id="L59">                        StockFacade stockFacade = new StockFacade(itemService, stockService, shelfService, reorderNotifier);</span>
+
+<span class="nc" id="L61">                        new ItemCLI(itemService, shelfService, stockFacade).start();</span>
+                    }
+<span class="nc" id="L63">                }</span>
+<span class="nc" id="L64">                case &quot;4&quot; -&gt; new ReportCLI(sc, connection).showMenu(user);</span>
+                case &quot;0&quot; -&gt; {
+<span class="fc" id="L66">                    System.out.println(&quot;🔒 Logging out...&quot;);</span>
+<span class="fc" id="L67">                    return;</span>
+                }
+<span class="fc" id="L69">                default -&gt; System.out.println(&quot;Invalid choice.&quot;);</span>
+            }
+<span class="fc" id="L71">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

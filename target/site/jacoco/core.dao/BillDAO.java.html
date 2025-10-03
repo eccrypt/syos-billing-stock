@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BillDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.dao</a> &gt; <span class="el_source">BillDAO.java</span></div><h1>BillDAO.java</h1><pre class="source lang-java linenums">package core.dao;
+
+import core.billing.BasicBill;
+import core.models.Bill;
+
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BillDAO {
+    private final Connection conn;
+
+<span class="fc" id="L14">    public BillDAO(Connection conn) {</span>
+<span class="fc" id="L15">        this.conn = conn;</span>
+<span class="fc" id="L16">    }</span>
+
+    public int saveBill(Bill bill) throws SQLException {
+<span class="fc" id="L19">        String sql = &quot;INSERT INTO bills (serial_number, total, discount, cash_tendered, change_due, bill_date) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)&quot;;</span>
+<span class="fc" id="L20">        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {</span>
+<span class="fc" id="L21">            stmt.setInt(1, bill.getSerialNumber());</span>
+<span class="fc" id="L22">            stmt.setDouble(2, bill.getTotal());</span>
+<span class="fc" id="L23">            stmt.setDouble(3, bill.getDiscount());</span>
+<span class="fc" id="L24">            stmt.setDouble(4, bill.getCashTendered());</span>
+<span class="fc" id="L25">            stmt.setDouble(5, bill.getChangeDue());</span>
+<span class="fc" id="L26">            stmt.executeUpdate();</span>
+
+<span class="fc" id="L28">            ResultSet rs = stmt.getGeneratedKeys();</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">            if (rs.next()) return rs.getInt(1);</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">        }</span>
+<span class="nc" id="L31">        return -1;</span>
+    }
+
+    public List&lt;Bill&gt; getAllBills() throws SQLException {
+<span class="fc" id="L35">        List&lt;Bill&gt; bills = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L36">        String sql = &quot;SELECT * FROM bills ORDER BY bill_date DESC&quot;;</span>
+<span class="fc" id="L37">        try (PreparedStatement stmt = conn.prepareStatement(sql);</span>
+<span class="fc" id="L38">             ResultSet rs = stmt.executeQuery()) {</span>
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L41">                bills.add(mapResultSetToBill(rs));</span>
+            }
+        }
+<span class="fc" id="L44">        return bills;</span>
+    }
+
+    public List&lt;Bill&gt; getBillsByDate(LocalDate date) throws SQLException {
+<span class="fc" id="L48">        List&lt;Bill&gt; bills = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L49">        String sql = &quot;SELECT * FROM bills WHERE DATE(bill_date) = ?&quot;;</span>
+<span class="fc" id="L50">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L51">            stmt.setDate(1, Date.valueOf(date));</span>
+<span class="fc" id="L52">            ResultSet rs = stmt.executeQuery();</span>
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L55">                bills.add(mapResultSetToBill(rs));</span>
+            }
+        }
+<span class="fc" id="L58">        return bills;</span>
+    }
+
+    public Bill getBillById(int id) throws SQLException {
+<span class="fc" id="L62">        String sql = &quot;SELECT * FROM bills WHERE id = ?&quot;;</span>
+<span class="fc" id="L63">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L64">            stmt.setInt(1, id);</span>
+<span class="fc" id="L65">            ResultSet rs = stmt.executeQuery();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            if (rs.next()) {</span>
+<span class="fc" id="L67">                return mapResultSetToBill(rs);</span>
+            }
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        }</span>
+<span class="nc" id="L70">        return null;</span>
+    }
+
+
+    private Bill mapResultSetToBill(ResultSet rs) throws SQLException {
+<span class="fc" id="L75">        return new BasicBill(</span>
+<span class="fc" id="L76">                rs.getDouble(&quot;total&quot;),</span>
+<span class="fc" id="L77">                rs.getDouble(&quot;discount&quot;),</span>
+<span class="fc" id="L78">                rs.getDouble(&quot;cash_tendered&quot;),</span>
+<span class="fc" id="L79">                rs.getDouble(&quot;change_due&quot;),</span>
+                new ArrayList&lt;&gt;(), // You can load BillItems separately if needed
+<span class="fc" id="L81">                rs.getInt(&quot;serial_number&quot;)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemDAO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">core.dao</a> &gt; <span class="el_source">ItemDAO.java</span></div><h1>ItemDAO.java</h1><pre class="source lang-java linenums">package core.dao;
+
+import core.models.Item;
+import core.repositories.ItemRepository;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ItemDAO implements ItemRepository {
+    private final Connection conn;
+
+<span class="fc" id="L13">    public ItemDAO(Connection conn) {</span>
+<span class="fc" id="L14">        this.conn = conn;</span>
+<span class="fc" id="L15">    }</span>
+
+    // Method to generate the product code (incremental approach)
+    public String generateProductCode() throws SQLException {
+<span class="fc" id="L19">        String sqlGetLastCode = &quot;SELECT code FROM items ORDER BY items_id DESC LIMIT 1&quot;;</span>
+<span class="fc" id="L20">        String newCode = &quot;ITEM-0001&quot;;  // Default starting value</span>
+
+<span class="fc" id="L22">        try (PreparedStatement stmt = conn.prepareStatement(sqlGetLastCode);</span>
+<span class="fc" id="L23">             ResultSet rs = stmt.executeQuery()) {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">            if (rs.next()) {</span>
+<span class="fc" id="L25">                String lastCode = rs.getString(&quot;code&quot;);</span>
+<span class="fc" id="L26">                String lastNumber = lastCode.substring(lastCode.lastIndexOf(&quot;-&quot;) + 1);  // Extract number part</span>
+<span class="fc" id="L27">                int newNumber = Integer.parseInt(lastNumber) + 1;  // Increment it</span>
+<span class="fc" id="L28">                newCode = &quot;ITEM-&quot; + String.format(&quot;%04d&quot;, newNumber);  // Format with leading zeros</span>
+            }
+        }
+<span class="fc" id="L31">        return newCode;</span>
+    }
+
+    @Override
+    public Item getItemByCode(String code) throws SQLException {
+<span class="fc" id="L36">        String sql = &quot;SELECT * FROM items WHERE code = ?&quot;;</span>
+<span class="fc" id="L37">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L38">            stmt.setString(1, code);</span>
+<span class="fc" id="L39">            ResultSet rs = stmt.executeQuery();</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (rs.next()) {</span>
+<span class="fc" id="L41">                return new Item(</span>
+<span class="fc" id="L42">                        rs.getString(&quot;code&quot;),</span>
+<span class="fc" id="L43">                        rs.getString(&quot;name&quot;),</span>
+<span class="fc" id="L44">                        rs.getDouble(&quot;price&quot;)</span>
+                );
+            }
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        }</span>
+<span class="fc" id="L48">        return null;</span>
+    }
+
+    @Override
+    public List&lt;Item&gt; getAllItems() throws SQLException {
+<span class="nc" id="L53">        String sql = &quot;SELECT * FROM items&quot;;</span>
+<span class="nc" id="L54">        List&lt;Item&gt; items = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L55">        try (PreparedStatement stmt = conn.prepareStatement(sql);</span>
+<span class="nc" id="L56">             ResultSet rs = stmt.executeQuery()) {</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">            while (rs.next()) {</span>
+<span class="nc" id="L58">                items.add(new Item(</span>
+<span class="nc" id="L59">                        rs.getString(&quot;code&quot;),</span>
+<span class="nc" id="L60">                        rs.getString(&quot;name&quot;),</span>
+<span class="nc" id="L61">                        rs.getDouble(&quot;price&quot;)</span>
+                ));
+            }
+        }
+<span class="nc" id="L65">        return items;</span>
+    }
+
+    @Override
+    public void addItem(Item item) throws SQLException {
+<span class="nc" id="L70">        String newCode = generateProductCode();  // Generate the product code</span>
+
+        // Insert the item into the database with the generated code
+<span class="nc" id="L73">        String sql = &quot;INSERT INTO items (code, name, price) VALUES (?, ?, ?)&quot;;</span>
+<span class="nc" id="L74">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="nc" id="L75">            stmt.setString(1, newCode);  // Use the generated code</span>
+<span class="nc" id="L76">            stmt.setString(2, item.getName());</span>
+<span class="nc" id="L77">            stmt.setDouble(3, item.getPrice());</span>
+<span class="nc" id="L78">            stmt.executeUpdate();</span>
+        }
+
+<span class="nc" id="L81">        item.setCode(newCode);  // Set the auto-generated code on the item object</span>
+<span class="nc" id="L82">    }</span>
+
+    @Override
+    public void updateItem(Item item) throws SQLException {
+<span class="fc" id="L86">        String sql = &quot;UPDATE items SET name = ?, price = ? WHERE code = ?&quot;;</span>
+<span class="fc" id="L87">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L88">            stmt.setString(1, item.getName());</span>
+<span class="fc" id="L89">            stmt.setDouble(2, item.getPrice());</span>
+<span class="fc" id="L90">            stmt.setString(3, item.getCode());</span>
+<span class="fc" id="L91">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L93">    }</span>
+
+    @Override
+    public void deleteItem(String code) throws SQLException {
+<span class="fc" id="L97">        String sql = &quot;DELETE FROM items WHERE code = ?&quot;;</span>
+<span class="fc" id="L98">        try (PreparedStatement stmt = conn.prepareStatement(sql)) {</span>
+<span class="fc" id="L99">            stmt.setString(1, code);</span>
+<span class="fc" id="L100">            stmt.executeUpdate();</span>
+        }
+<span class="fc" id="L102">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

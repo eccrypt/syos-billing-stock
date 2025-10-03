@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: tests.core.dao.BillItemDAOTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.104 s <<< FAILURE! -- in tests.core.dao.BillItemDAOTest
+tests.core.dao.BillItemDAOTest.testSaveBillItems -- Time elapsed: 0.076 s <<< FAILURE!
+org.mockito.exceptions.verification.TooFewActualInvocations: 
+
+stmt.setString(2, "ITEM1");
+Wanted 2 times:
+-> at tests.core.dao.BillItemDAOTest.testSaveBillItems(BillItemDAOTest.java:50)
+But was 1 time:
+-> at core.dao.BillItemDAO.saveBillItems(BillItemDAO.java:19)
+
+	at tests.core.dao.BillItemDAOTest.testSaveBillItems(BillItemDAOTest.java:50)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemCLIHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">syos-system</a> &gt; <a href="index.source.html" class="el_package">cli.menus</a> &gt; <span class="el_source">ItemCLIHandler.java</span></div><h1>ItemCLIHandler.java</h1><pre class="source lang-java linenums">package cli.menus;
+
+import core.models.Item;
+import core.models.Shelf;
+import core.services.ItemService;
+import core.facade.StockFacade;
+import core.services.ShelfService;
+
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Scanner;
+
+public class ItemCLIHandler {
+    private final ItemService itemService;
+    private final ShelfService shelfService;
+    private final StockFacade stockFacade;
+    private final Scanner scanner;
+
+    // Constructor that accepts a custom Scanner
+<span class="fc" id="L23">    public ItemCLIHandler(ItemService itemService, ShelfService shelfService, StockFacade stockFacade, Scanner scanner) {</span>
+<span class="fc" id="L24">        this.itemService = itemService;</span>
+<span class="fc" id="L25">        this.shelfService = shelfService;</span>
+<span class="fc" id="L26">        this.stockFacade = stockFacade;</span>
+<span class="fc" id="L27">        this.scanner = scanner;</span>
+<span class="fc" id="L28">    }</span>
+
+    // Default constructor using a new Scanner
+    public ItemCLIHandler(ItemService itemService, ShelfService shelfService, StockFacade stockFacade) {
+<span class="nc" id="L32">        this(itemService, shelfService, stockFacade, new Scanner(System.in));</span>
+<span class="nc" id="L33">    }</span>
+
+    public void handleViewAllItems() throws SQLException {
+<span class="fc" id="L36">        List&lt;Item&gt; items = itemService.getAllItems();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (items.isEmpty()) {</span>
+<span class="fc" id="L38">            System.out.println(&quot;No items found.&quot;);</span>
+        } else {
+<span class="nc" id="L40">            System.out.println(&quot;\n📦 All Items:&quot;);</span>
+<span class="nc" id="L41">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+<span class="nc" id="L42">            System.out.println(&quot;| Item Code  | Item Name                | Price (Rs) |&quot;);</span>
+<span class="nc" id="L43">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            for (Item item : items) {</span>
+<span class="nc" id="L46">                System.out.printf(&quot;| %-10s | %-24s | %10.2f |\n&quot;,</span>
+<span class="nc" id="L47">                        item.getCode(), item.getName(), item.getPrice());</span>
+<span class="nc" id="L48">            }</span>
+
+<span class="nc" id="L50">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+        }
+<span class="fc" id="L52">    }</span>
+
+    public void handleSearchItem() throws SQLException {
+<span class="fc" id="L55">        System.out.print(&quot;Enter item code: &quot;);</span>
+<span class="fc" id="L56">        String code = scanner.nextLine();</span>
+<span class="fc" id="L57">        Item item = itemService.getItemByCode(code);</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (item == null) {</span>
+<span class="nc" id="L60">            System.out.println(&quot;❌ Item not found.&quot;);</span>
+        } else {
+<span class="fc" id="L62">            System.out.println(&quot;\n📦 Item Details:&quot;);</span>
+<span class="fc" id="L63">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+<span class="fc" id="L64">            System.out.println(&quot;| Item Code  | Item Name                | Price (Rs) |&quot;);</span>
+<span class="fc" id="L65">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+
+<span class="fc" id="L67">            System.out.printf(&quot;| %-10s | %-24s | %10.2f |\n&quot;,</span>
+<span class="fc" id="L68">                    item.getCode(), item.getName(), item.getPrice());</span>
+
+<span class="fc" id="L70">            System.out.println(&quot;+------------+--------------------------+------------+&quot;);</span>
+        }
+<span class="fc" id="L72">    }</span>
+
+    public void handleAddItem() throws SQLException, ParseException {
+<span class="nc" id="L75">        System.out.print(&quot;Enter item name: &quot;);</span>
+<span class="nc" id="L76">        String name = scanner.nextLine();</span>
+<span class="nc" id="L77">        System.out.print(&quot;Enter item price: &quot;);</span>
+<span class="nc" id="L78">        double price = Double.parseDouble(scanner.nextLine());</span>
+
+<span class="nc" id="L80">        System.out.println(&quot;\nThis Shelf is allocated for this Item&quot;);</span>
+<span class="nc" id="L81">        System.out.print(&quot;Enter default shelf quantity: &quot;);</span>
+<span class="nc" id="L82">        int shelfDefault = Integer.parseInt(scanner.nextLine());</span>
+
+<span class="nc" id="L84">        System.out.println(&quot;\nFirst Stock Batch Creation&quot;);</span>
+<span class="nc" id="L85">        System.out.print(&quot;Enter Quantity: &quot;);</span>
+<span class="nc" id="L86">        int quantity = Integer.parseInt(scanner.nextLine());</span>
+<span class="nc" id="L87">        System.out.println(&quot;Entry Date Will be the Current Date&quot;);</span>
+<span class="nc" id="L88">        LocalDate currentDate = LocalDate.now();</span>
+<span class="nc" id="L89">        String entryDate = currentDate.format(DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;));</span>
+
+<span class="nc" id="L91">        System.out.print(&quot;Enter Expiry Date (yyyy-MM-dd): &quot;);</span>
+<span class="nc" id="L92">        String expiryDate = scanner.nextLine();</span>
+
+<span class="nc" id="L94">        Item newItem = new Item(name, price);</span>
+<span class="nc" id="L95">        itemService.addItem(newItem, shelfDefault, 0);</span>
+<span class="nc" id="L96">        System.out.println(&quot;✅ Item added with product code: &quot; + newItem.getCode());</span>
+
+<span class="nc" id="L98">        stockFacade.stockItem(newItem.getCode(), quantity, entryDate, expiryDate);</span>
+
+<span class="nc" id="L100">        Shelf newShelf = new Shelf(newItem.getCode(), shelfDefault, shelfDefault);</span>
+<span class="nc" id="L101">        stockFacade.getShelfService().addShelf(newShelf);</span>
+<span class="nc" id="L102">        System.out.println(&quot;✅ Shelf created with default quantity: &quot; + shelfDefault + &quot;.&quot;);</span>
+
+<span class="nc" id="L104">        newShelf.setShelfCurrent(newShelf.getShelfDefault());</span>
+<span class="nc" id="L105">        int reducedStockBatchQuantity = quantity - newShelf.getShelfDefault();</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (reducedStockBatchQuantity &gt; 0) {</span>
+<span class="nc" id="L108">            stockFacade.updateStockEntry(newItem.getCode(), reducedStockBatchQuantity, expiryDate);</span>
+        }
+
+<span class="nc" id="L111">        stockFacade.getShelfService().updateShelf(newShelf);</span>
+<span class="nc" id="L112">        System.out.println(&quot;✅ Shelf current quantity updated to: &quot; + newShelf.getShelfCurrent());</span>
+<span class="nc" id="L113">    }</span>
+
+    public void handleUpdateItem() throws SQLException {
+<span class="fc" id="L116">        System.out.print(&quot;Enter item code: &quot;);</span>
+<span class="fc" id="L117">        String code = scanner.nextLine();</span>
+<span class="fc" id="L118">        System.out.print(&quot;Enter new name: &quot;);</span>
+<span class="fc" id="L119">        String name = scanner.nextLine();</span>
+<span class="fc" id="L120">        System.out.print(&quot;Enter new price: &quot;);</span>
+<span class="fc" id="L121">        double price = Double.parseDouble(scanner.nextLine());</span>
+
+<span class="fc" id="L123">        itemService.updateItem(new Item(code, name, price));</span>
+<span class="fc" id="L124">        System.out.println(&quot;✅ Item updated.&quot;);</span>
+<span class="fc" id="L125">    }</span>
+
+    public void handleUpdateItemName() throws SQLException {
+<span class="fc" id="L128">        System.out.print(&quot;Enter item code: &quot;);</span>
+<span class="fc" id="L129">        String code = scanner.nextLine();</span>
+<span class="fc" id="L130">        System.out.print(&quot;Enter new name: &quot;);</span>
+<span class="fc" id="L131">        String name = scanner.nextLine();</span>
+
+<span class="fc" id="L133">        itemService.updateItemName(code, name);</span>
+<span class="fc" id="L134">        System.out.println(&quot;✅ Item name updated.&quot;);</span>
+<span class="fc" id="L135">    }</span>
+
+    public void handleUpdateItemPrice() throws SQLException {
+<span class="fc" id="L138">        System.out.print(&quot;Enter item code: &quot;);</span>
+<span class="fc" id="L139">        String code = scanner.nextLine();</span>
+<span class="fc" id="L140">        System.out.print(&quot;Enter new price: &quot;);</span>
+<span class="fc" id="L141">        double price = Double.parseDouble(scanner.nextLine());</span>
+
+<span class="fc" id="L143">        itemService.updateItemPrice(code, price);</span>
+<span class="fc" id="L144">        System.out.println(&quot;✅ Item price updated.&quot;);</span>
+<span class="fc" id="L145">    }</span>
+
+    public void handleDeleteItem() throws SQLException {
+<span class="fc" id="L148">        System.out.print(&quot;Enter item code: &quot;);</span>
+<span class="fc" id="L149">        String code = scanner.nextLine();</span>
+<span class="fc" id="L150">        itemService.deleteItem(code);</span>
+<span class="fc" id="L151">        System.out.println(&quot;✅ Item deleted.&quot;);</span>
+<span class="fc" id="L152">    }</span>
+
+    public void handleAllocateStock() throws SQLException {
+<span class="fc" id="L155">        System.out.print(&quot;Enter item code for allocation: &quot;);</span>
+<span class="fc" id="L156">        String itemCode = scanner.nextLine();</span>
+<span class="fc" id="L157">        System.out.print(&quot;Enter quantity to allocate: &quot;);</span>
+<span class="fc" id="L158">        int quantity = Integer.parseInt(scanner.nextLine());</span>
+
+<span class="fc" id="L160">        stockFacade.allocateStock(itemCode, quantity);</span>
+<span class="fc" id="L161">    }</span>
+
+    public void handleViewStockLevel() throws SQLException {
+<span class="fc" id="L164">        System.out.print(&quot;Enter item code to check stock level: &quot;);</span>
+<span class="fc" id="L165">        String itemCode = scanner.nextLine();</span>
+<span class="fc" id="L166">        stockFacade.printStockLevel(itemCode);</span>
+<span class="fc" id="L167">    }</span>
+
+    public void handleCheckReorderAlerts() throws SQLException {
+<span class="fc" id="L170">        stockFacade.checkAndPrintReorderAlerts();</span>
+<span class="fc" id="L171">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
