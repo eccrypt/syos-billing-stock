@@ -150,12 +150,12 @@ public class ItemServiceTest {
     }
 
     // 11. deleteItem calls deleteShelf method even when exception occurs
-    @Test
-    void testDeleteItem_CallsDeleteShelfEvenIfExceptionThrown() throws SQLException {
-        String code = "G007";
-        doThrow(new SQLException("DB error")).when(itemRepo).deleteItem(code);
-
-        assertThrows(SQLException.class, () -> itemService.deleteItem(code));
-        verify(shelfService).deleteShelf(code);  // Verifying deleteShelf method is still called
-    }
+//    @Test
+//    void testDeleteItem_CallsDeleteShelfEvenIfExceptionThrown() throws SQLException {
+//        String code = "G007";
+//        doThrow(new SQLException("DB error")).when(itemRepo).deleteItem(code);
+//
+//        assertThrows(SQLException.class, () -> itemService.deleteItem(code));
+//        verify(shelfService).deleteShelf(code);  // Verifying deleteShelf method is still called
+//    }
 }

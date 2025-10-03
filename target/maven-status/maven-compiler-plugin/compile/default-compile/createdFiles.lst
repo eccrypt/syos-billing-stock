@@ -1,4 +1,5 @@
 core\repositories\ItemRepository.class
+core\utils\TaskExecutor.class
 core\billing\BillDecorator.class
 core\report\DailySalesReporter.class
 core\report\BillReport.class
@@ -15,6 +16,7 @@ core\report\ReportTemplate.class
 cli\menus\ItemCLIHandler.class
 cli\menus\StockCLIHandler.class
 core\facade\StockFacade.class
+core\services\ShelfService.class
 core\discount\DiscountHandler.class
 core\utils\SerialNumberGenerator.class
 cli\MainCLI.class
@@ -30,6 +32,7 @@ core\strategy\stock\StockAllocator.class
 cli\ItemCLI.class
 cli\ReportCLI.class
 core\dao\BillDAO.class
+core\models\Shelf.class
 core\models\Bill.class
 core\repositories\StockEntryRepository.class
 core\report\StockReport.class
@@ -37,6 +40,7 @@ core\services\BillingService.class
 core\utils\DatabaseConnectionManager.class
 core\observer\StockObserver.class
 core\services\AuthenticationService.class
+core\dao\ShelfDAO.class
 cli\BillingCLI.class
 core\dao\BillItemDAO.class
 cli\StockCLI.class
@@ -47,11 +51,13 @@ core\command\Command.class
 core\discount\DiscountContext.class
 core\services\ItemService.class
 core\discount\BulkPurchaseDiscount.class
+core\repositories\ShelfRepository.class
 core\services\StockService.class
 core\dao\StockEntryDAO.class
 core\discount\DiscountResult.class
 core\billing\DiscountedBill.class
 core\billing\BillBuilder.class
+core\utils\LockManager.class
 core\discount\SeasonalDiscount.class
 core\userfactory\UserFactory.class
 core\utils\EncryptionUtil.class
@@ -59,5 +65,6 @@ cli\AuthenticationCLI.class
 core\models\Item.class
 cli\EmployeeCLI.class
 core\report\ReorderReport.class
+web\servlets\AuthenticationServlet.class
 core\dao\ItemDAO.class
 core\billing\FooterBill.class

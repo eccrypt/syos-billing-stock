@@ -1,0 +1,12 @@
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:32:18 +0530] "POST /syos-system/api/auth/register%0A HTTP/1.1" 404 28 http-bio-8080-exec-3 10888
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:32:53 +0530] "POST /syos-system/api/auth/register%0A HTTP/1.1" 404 28 http-bio-8080-exec-5 10456
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:33:36 +0530] "POST /syos-system/api/auth/register%0A HTTP/1.1" 404 28 http-bio-8080-exec-7 10509
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:33:39 +0530] "POST /syos-system/api/auth/register HTTP/1.1" 200 - http-bio-8080-exec-9 67
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:33:51 +0530] "POST /syos-system/api/auth/register HTTP/1.1" 200 - http-bio-8080-exec-1 4
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:39:54 +0530] "POST /syos-system/api/auth/register HTTP/1.1" 500 55 http-bio-8080-exec-3 259
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:39:57 +0530] "POST /syos-system/api/auth/register HTTP/1.1" 500 55 http-bio-8080-exec-6 4
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:12:43:23 +0530] "POST /syos-system/api/auth/register HTTP/1.1" 201 53 http-bio-8080-exec-9 230
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:13:23:04 +0530] "GET /syos-system/api/auth/login?username=testuser&password=testuser123 HTTP/1.1" 405 1065 http-bio-8080-exec-2 2
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:13:23:53 +0530] "GET /syos-system/api/auth/login HTTP/1.1" 405 1065 http-bio-8080-exec-2 0
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:13:25:03 +0530] "GET /syos-system/api/auth/login HTTP/1.1" 405 1065 http-bio-8080-exec-6 0
+0:0:0:0:0:0:0:1 - - [03/Oct/2025:13:26:01 +0530] "POST /syos-system/api/auth/login HTTP/1.1" 200 59 http-bio-8080-exec-8 122
