@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: tests.core.report.ReorderReportTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.036 s <<< FAILURE! -- in tests.core.report.ReorderReportTest
-tests.core.report.ReorderReportTest.testGenerate_ItemNotFound -- Time elapsed: 0.012 s <<< ERROR!
+Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.023 s <<< FAILURE! -- in tests.core.report.ReorderReportTest
+tests.core.report.ReorderReportTest.testGenerate_ItemNotFound -- Time elapsed: 0.006 s <<< ERROR!
 org.mockito.exceptions.base.MockitoException: 
 
 Checked exception is invalid for this method!

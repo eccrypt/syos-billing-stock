@@ -1,6 +1,5 @@
 package web.servlets;
 
-import core.command.Command;
 import core.command.GenerateReportCommand;
 import core.command.ReportInvoker;
 import core.dao.BillDAO;
@@ -25,7 +24,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-@WebServlet("/report/*")
+@WebServlet(urlPatterns = "/report/*")
 public class ReportServlet extends HttpServlet {
     private BillDAO billDAO;
     private StockService stockService;
@@ -53,7 +52,7 @@ public class ReportServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 
@@ -65,7 +64,7 @@ public class ReportServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 

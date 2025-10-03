@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet("/billing")
+@WebServlet(urlPatterns = "/billing/*")
 public class BillingServlet extends HttpServlet {
     private BillingService billingService;
 
@@ -35,7 +35,7 @@ public class BillingServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("index.jsp?error=Please login first");
+            response.sendRedirect("/api/auth/login");
             return;
         }
 
@@ -47,7 +47,7 @@ public class BillingServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 

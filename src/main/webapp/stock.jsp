@@ -10,37 +10,27 @@
 <html>
 <head>
     <title>Stock Management</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 800px; margin: auto; }
-        .menu { list-style: none; padding: 0; }
-        .menu li { margin-bottom: 10px; }
-        .menu button { width: 100%; padding: 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        .menu button:hover { background-color: #0056b3; }
-        .error { color: red; }
-        .success { color: green; }
-    </style>
 </head>
 <body>
-    <div class="container">
+    <div>
         <h1>Stock Management</h1>
         <a href="dashboard.jsp">Back to Dashboard</a>
 
         <% if (request.getAttribute("error") != null) { %>
-            <p class="error"><%= request.getAttribute("error") %></p>
+            <p><%= request.getAttribute("error") %></p>
         <% } %>
         <% if (request.getAttribute("message") != null) { %>
-            <p class="success"><%= request.getAttribute("message") %></p>
+            <p><%= request.getAttribute("message") %></p>
         <% } %>
 
-        <ul class="menu">
+        <ul>
             <li><button onclick="location.href='stock/view'">View All Stock Entries</button></li>
             <li><button onclick="location.href='stock/reorder'">Check Reorder Alerts</button></li>
             <li><button onclick="location.href='stock/level'">View Stock Level</button></li>
-            <li><form action="stock" method="post" style="display:inline;"><input type="hidden" name="action" value="add"><button type="submit">Add Stock Entry</button></form></li>
-            <li><form action="stock" method="post" style="display:inline;"><input type="hidden" name="action" value="allocate"><button type="submit">Allocate Stock</button></form></li>
-            <li><form action="stock" method="post" style="display:inline;"><input type="hidden" name="action" value="update"><button type="submit">Update Stock Entry</button></form></li>
-            <li><form action="stock" method="post" style="display:inline;"><input type="hidden" name="action" value="delete"><button type="submit">Delete Stock Entry</button></form></li>
+            <li><form action="stock" method="post"><input type="hidden" name="action" value="add"><button type="submit">Add Stock Entry</button></form></li>
+            <li><form action="stock" method="post"><input type="hidden" name="action" value="allocate"><button type="submit">Allocate Stock</button></form></li>
+            <li><form action="stock" method="post"><input type="hidden" name="action" value="update"><button type="submit">Update Stock Entry</button></form></li>
+            <li><form action="stock" method="post"><input type="hidden" name="action" value="delete"><button type="submit">Delete Stock Entry</button></form></li>
         </ul>
     </div>
 </body>

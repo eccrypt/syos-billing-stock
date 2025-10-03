@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: tests.core.dao.BillItemDAOTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.104 s <<< FAILURE! -- in tests.core.dao.BillItemDAOTest
-tests.core.dao.BillItemDAOTest.testSaveBillItems -- Time elapsed: 0.076 s <<< FAILURE!
+Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.078 s <<< FAILURE! -- in tests.core.dao.BillItemDAOTest
+tests.core.dao.BillItemDAOTest.testSaveBillItems -- Time elapsed: 0.062 s <<< FAILURE!
 org.mockito.exceptions.verification.TooFewActualInvocations: 
 
 stmt.setString(2, "ITEM1");

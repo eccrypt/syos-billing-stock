@@ -1,15 +1,15 @@
 -------------------------------------------------------------------------------
 Test set: tests.core.dao.StockEntryDAOTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.086 s <<< FAILURE! -- in tests.core.dao.StockEntryDAOTest
-tests.core.dao.StockEntryDAOTest.testFindAll -- Time elapsed: 0.010 s <<< ERROR!
+Tests run: 7, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.061 s <<< FAILURE! -- in tests.core.dao.StockEntryDAOTest
+tests.core.dao.StockEntryDAOTest.testFindAll -- Time elapsed: 0.008 s <<< ERROR!
 java.lang.ClassCastException: class java.util.Date cannot be cast to class java.sql.Date (java.util.Date is in module java.base of loader 'bootstrap'; java.sql.Date is in module java.sql of loader 'platform')
 	at tests.core.dao.StockEntryDAOTest.testFindAll(StockEntryDAOTest.java:111)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 
-tests.core.dao.StockEntryDAOTest.testReduceQuantity -- Time elapsed: 0.017 s <<< ERROR!
+tests.core.dao.StockEntryDAOTest.testReduceQuantity -- Time elapsed: 0.011 s <<< ERROR!
 org.mockito.exceptions.misusing.UnfinishedStubbingException: 
 
 Unfinished stubbing detected here:
@@ -30,14 +30,14 @@ Hints:
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 
-tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode -- Time elapsed: 0.007 s <<< ERROR!
+tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode -- Time elapsed: 0.008 s <<< ERROR!
 java.lang.ClassCastException: class java.util.Date cannot be cast to class java.sql.Date (java.util.Date is in module java.base of loader 'bootstrap'; java.sql.Date is in module java.sql of loader 'platform')
 	at tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode(StockEntryDAOTest.java:154)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
 
-tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode_StockEntryNotFound -- Time elapsed: 0.015 s <<< ERROR!
+tests.core.dao.StockEntryDAOTest.testGetStockEntryByItemCode_StockEntryNotFound -- Time elapsed: 0.006 s <<< ERROR!
 org.mockito.exceptions.misusing.UnfinishedStubbingException: 
 
 Unfinished stubbing detected here:

@@ -3,10 +3,8 @@ package web.servlets;
 import core.services.AuthenticationService;
 import core.dao.UserDAO;
 import core.models.User;
-import core.utils.TaskExecutor;
 import core.utils.DatabaseConnectionManager;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -14,11 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet(value = "/api/auth/*", asyncSupported = true)
+@WebServlet(urlPatterns = "/api/auth/*", loadOnStartup = 1)
 public class AuthenticationServlet extends HttpServlet {
     private AuthenticationService authService;
 
@@ -34,97 +31,80 @@ public class AuthenticationServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-
-        String path = req.getPathInfo(); // e.g., /register or /login
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String path = req.getPathInfo();
         if (path == null) {
-            sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "Invalid endpoint");
+            resp.sendRedirect("/index.jsp");
             return;
         }
 
-        // Enable async mode
-        AsyncContext asyncContext = req.startAsync();
-
         switch (path) {
-            case "/register":
-                handleRegister(asyncContext);
-                break;
             case "/login":
-                handleLogin(asyncContext);
+                resp.sendRedirect("/login.jsp");
+                break;
+            case "/register":
+                resp.sendRedirect("/register.jsp");
                 break;
             default:
-                sendError(resp, HttpServletResponse.SC_NOT_FOUND, "Unknown endpoint");
-                asyncContext.complete();
+                resp.sendRedirect("/index.jsp");
         }
     }
 
-    private void handleRegister(AsyncContext asyncContext) {
-        HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
-        HttpServletResponse resp = (HttpServletResponse) asyncContext.getResponse();
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String path = req.getPathInfo(); 
+        if (path == null) {
+            resp.sendRedirect("/index.jsp?error=Invalid endpoint");
+            return;
+        }
 
+        switch (path) {
+            case "/register":
+                handleRegister(req, resp);
+                break;
+            case "/login":
+                handleLogin(req, resp);
+                break;
+            default:
+                resp.sendRedirect("/index.jsp?error=Unknown endpoint");
+        }
+    }
+
+    private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = req.getParameter("username");
         String role = req.getParameter("role");
         String password = req.getParameter("password");
 
-        TaskExecutor.submit(() -> {
-            try {
-                boolean success = authService.registerUser(username, role, password);
-                if (success) {
-                    resp.sendRedirect("../index.jsp?message=Registration successful");
-                } else {
-                    resp.sendRedirect("../index.jsp?error=Username already exists");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    resp.sendRedirect("../index.jsp?error=Server error during registration");
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            } finally {
-                asyncContext.complete();
+        try {
+            boolean success = authService.registerUser(username, role, password);
+            if (success) {
+                resp.sendRedirect("/index.jsp?message=Registration successful");
+            } else {
+                resp.sendRedirect("/index.jsp?error=Username already exists");
             }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("/index.jsp?error=Server error during registration");
+        }
     }
 
-    private void handleLogin(AsyncContext asyncContext) {
-        HttpServletRequest req = (HttpServletRequest) asyncContext.getRequest();
-        HttpServletResponse resp = (HttpServletResponse) asyncContext.getResponse();
-
+    private void handleLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
-        TaskExecutor.submit(() -> {
-            try {
-                User user = authService.login(username, password);
-                if (user != null) {
-                    HttpSession session = req.getSession();
-                    session.setAttribute("user", user);
-                    resp.sendRedirect("../dashboard.jsp");
-                } else {
-                    resp.sendRedirect("../index.jsp?error=Invalid username or password");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    resp.sendRedirect("../index.jsp?error=Server error during login");
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            } finally {
-                asyncContext.complete();
+        try {
+            User user = authService.login(username, password);
+            if (user != null) {
+                HttpSession session = req.getSession();
+                session.setAttribute("user", user);
+                resp.sendRedirect("/dashboard.jsp");
+            } else {
+                resp.sendRedirect("/index.jsp?error=Invalid username or password");
             }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("/index.jsp?error=Server error during login");
+        }
     }
 
-    private void sendError(HttpServletResponse resp, int status, String message) {
-        try {
-            resp.setStatus(status);
-            PrintWriter out = resp.getWriter();
-            out.write("{\"error\":\"" + message + "\"}");
-            out.flush();
-        } catch (IOException ignored) {}
-    }
 }

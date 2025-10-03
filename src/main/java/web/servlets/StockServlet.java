@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet("/stock/*")
+@WebServlet(urlPatterns = "/stock/*")
 public class StockServlet extends HttpServlet {
     private StockCLIHandler handler;
 
@@ -46,7 +46,7 @@ public class StockServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/api/auth/login");
             return;
         }
 
@@ -84,7 +84,7 @@ public class StockServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 

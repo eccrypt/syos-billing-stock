@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet("/item/*")
+@WebServlet(urlPatterns = "/item/*")
 public class ItemServlet extends HttpServlet {
     private ItemCLIHandler handler;
 
@@ -45,7 +45,7 @@ public class ItemServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 
@@ -80,7 +80,7 @@ public class ItemServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null) {
-            response.sendRedirect("../index.jsp?error=Please login first");
+            response.sendRedirect("/index.jsp?error=Please login first");
             return;
         }
 
