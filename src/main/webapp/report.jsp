@@ -67,6 +67,11 @@
                 </form>
             </li>
         </ul>
+
+        <% if ("report".equals(request.getAttribute("view"))) { %>
+        <h2>Report Output</h2>
+        <pre><%= request.getAttribute("report") %></pre>
+        <% } %>
     </div>
 </body>
 </html>

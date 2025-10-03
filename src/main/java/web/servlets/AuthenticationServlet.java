@@ -4,7 +4,11 @@ import core.services.AuthenticationService;
 import core.dao.UserDAO;
 import core.models.User;
 import core.utils.DatabaseConnectionManager;
+import web.async.AsyncRequestProcessor;
+import web.async.RequestHandler;
+import web.async.RequestTask;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,7 +19,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet(urlPatterns = "/api/auth/*", loadOnStartup = 1)
+@WebServlet(urlPatterns = "/api/auth/*", loadOnStartup = 1, asyncSupported = true)
 public class AuthenticationServlet extends HttpServlet {
     private AuthenticationService authService;
 
@@ -52,22 +56,26 @@ public class AuthenticationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo(); 
-        if (path == null) {
-            resp.sendRedirect("/index.jsp?error=Invalid endpoint");
-            return;
-        }
+        AsyncContext asyncContext = req.startAsync();
+        RequestHandler handler = (r, s) -> {
+            String path = r.getPathInfo();
+            if (path == null) {
+                s.sendRedirect("/index.jsp?error=Invalid endpoint");
+                return;
+            }
 
-        switch (path) {
-            case "/register":
-                handleRegister(req, resp);
-                break;
-            case "/login":
-                handleLogin(req, resp);
-                break;
-            default:
-                resp.sendRedirect("/index.jsp?error=Unknown endpoint");
-        }
+            switch (path) {
+                case "/register":
+                    handleRegister(r, s);
+                    break;
+                case "/login":
+                    handleLogin(r, s);
+                    break;
+                default:
+                    s.sendRedirect("/index.jsp?error=Unknown endpoint");
+            }
+        };
+        AsyncRequestProcessor.getInstance().submitTask(new RequestTask(asyncContext, handler));
     }
 
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws IOException {

@@ -1,7 +1,18 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="core.models.User" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user != null) {
+        response.sendRedirect("dashboard.jsp");
+        return;
+    }
+%>
 <html>
 <head>
     <title>Register</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <h1>Register</h1>

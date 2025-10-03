@@ -1,13 +1,13 @@
 package web.servlets;
 
-import core.command.GenerateReportCommand;
-import core.command.ReportInvoker;
 import core.dao.BillDAO;
 import core.dao.ItemDAO;
 import core.dao.ShelfDAO;
+import core.models.Bill;
+import core.models.Item;
+import core.models.StockEntry;
 import core.models.User;
 import core.observer.ReorderNotifier;
-import core.report.*;
 import core.services.ItemService;
 import core.services.ShelfService;
 import core.services.StockService;
@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 @WebServlet(urlPatterns = "/report/*")
 public class ReportServlet extends HttpServlet {
@@ -71,10 +73,25 @@ public class ReportServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
+            StringBuilder sb = new StringBuilder();
             switch (action) {
                 case "reorder":
-                    ReportTemplate report = new ReorderReport(reorderNotifier, itemService);
-                    new GenerateReportCommand(report).execute();
+                    sb.append("=== Reorder Level Report ===\n");
+                    Map<String, Integer> lowStockItems = reorderNotifier.getReorderItems();
+                    if (lowStockItems.isEmpty()) {
+                        sb.append("All stock levels are sufficient.\n");
+                    } else {
+                        sb.append(String.format("%-10s %-25s %-10s%n", "Item Code", "Item Name", "Quantity"));
+                        sb.append("--------------------------------------------------\n");
+                        for (Map.Entry<String, Integer> entry : lowStockItems.entrySet()) {
+                            try {
+                                Item item = itemService.getItemByCode(entry.getKey());
+                                sb.append(String.format("%-10s %-25s %-10d%n", item.getCode(), item.getName(), entry.getValue()));
+                            } catch (Exception e) {
+                                sb.append("Error loading item: " + entry.getKey() + "\n");
+                            }
+                        }
+                    }
                     break;
                 case "daily":
                     String dateStr = request.getParameter("date");
@@ -84,12 +101,19 @@ public class ReportServlet extends HttpServlet {
                         return;
                     }
                     LocalDate date = LocalDate.parse(dateStr);
-                    report = new DailySalesReporter(billDAO, date);
-                    new GenerateReportCommand(report).execute();
+                    List<Bill> bills = billDAO.getBillsByDate(date);
+                    int totalBills = bills.size();
+                    double totalRevenue = bills.stream().mapToDouble(Bill::getTotal).sum();
+                    sb.append(String.format("=== Daily Sales Report (%s) ===\n", dateStr));
+                    sb.append(String.format("Total Bills: %d | Total Revenue: %.2f\n", totalBills, totalRevenue));
                     break;
                 case "stock":
-                    report = new StockReport(stockService);
-                    new GenerateReportCommand(report).execute();
+                    sb.append("=== Current Stock Report (Batch-wise) ===\n");
+                    List<StockEntry> entries = stockService.getAllStockEntries();
+                    for (StockEntry entry : entries) {
+                        sb.append(String.format("Item: %s | Qty: %d | Entry: %s | Expiry: %s\n",
+                                entry.getItemCode(), entry.getQuantity(), entry.getEntryDate(), entry.getExpiryDate()));
+                    }
                     break;
                 case "bill":
                     dateStr = request.getParameter("date");
@@ -99,8 +123,11 @@ public class ReportServlet extends HttpServlet {
                         return;
                     }
                     date = LocalDate.parse(dateStr);
-                    report = new BillReport(billDAO, date);
-                    new GenerateReportCommand(report).execute();
+                    bills = billDAO.getBillsByDate(date);
+                    sb.append(String.format("=== Bill Report (%s) ===\n", dateStr));
+                    for (Bill bill : bills) {
+                        sb.append(String.format("Bill ID: %d | Total: %.2f | Date: %s\n", bill.getId(), bill.getTotal(), bill.getBillDate()));
+                    }
                     break;
                 case "all":
                     dateStr = request.getParameter("date");
@@ -110,17 +137,52 @@ public class ReportServlet extends HttpServlet {
                         return;
                     }
                     date = LocalDate.parse(dateStr);
-                    ReportInvoker invoker = new ReportInvoker();
-                    invoker.addCommand(new GenerateReportCommand(new ReorderReport(reorderNotifier, itemService)));
-                    invoker.addCommand(new GenerateReportCommand(new DailySalesReporter(billDAO, date)));
-                    invoker.addCommand(new GenerateReportCommand(new StockReport(stockService)));
-                    invoker.addCommand(new GenerateReportCommand(new BillReport(billDAO, date)));
-                    invoker.runCommands();
+                    // reorder
+                    sb.append("=== Reorder Level Report ===\n");
+                    lowStockItems = reorderNotifier.getReorderItems();
+                    if (lowStockItems.isEmpty()) {
+                        sb.append("All stock levels are sufficient.\n");
+                    } else {
+                        sb.append(String.format("%-10s %-25s %-10s%n", "Item Code", "Item Name", "Quantity"));
+                        sb.append("--------------------------------------------------\n");
+                        for (Map.Entry<String, Integer> entry : lowStockItems.entrySet()) {
+                            try {
+                                Item item = itemService.getItemByCode(entry.getKey());
+                                sb.append(String.format("%-10s %-25s %-10d%n", item.getCode(), item.getName(), entry.getValue()));
+                            } catch (Exception e) {
+                                sb.append("Error loading item: " + entry.getKey() + "\n");
+                            }
+                        }
+                    }
+                    sb.append("\n");
+                    // daily
+                    bills = billDAO.getBillsByDate(date);
+                    totalBills = bills.size();
+                    totalRevenue = bills.stream().mapToDouble(Bill::getTotal).sum();
+                    sb.append(String.format("=== Daily Sales Report (%s) ===\n", dateStr));
+                    sb.append(String.format("Total Bills: %d | Total Revenue: %.2f\n", totalBills, totalRevenue));
+                    sb.append("\n");
+                    // stock
+                    sb.append("=== Current Stock Report (Batch-wise) ===\n");
+                    entries = stockService.getAllStockEntries();
+                    for (StockEntry entry : entries) {
+                        sb.append(String.format("Item: %s | Qty: %d | Entry: %s | Expiry: %s\n",
+                                entry.getItemCode(), entry.getQuantity(), entry.getEntryDate(), entry.getExpiryDate()));
+                    }
+                    sb.append("\n");
+                    // bill
+                    sb.append(String.format("=== Bill Report (%s) ===\n", dateStr));
+                    for (Bill bill : bills) {
+                        sb.append(String.format("Bill ID: %d | Total: %.2f | Date: %s\n", bill.getId(), bill.getTotal(), bill.getBillDate()));
+                    }
                     break;
                 default:
                     request.setAttribute("error", "Unknown action");
+                    request.getRequestDispatcher("/report.jsp").forward(request, response);
+                    return;
             }
-            request.setAttribute("message", "Report generated. Check console for output.");
+            request.setAttribute("report", sb.toString());
+            request.setAttribute("view", "report");
         } catch (Exception e) {
             request.setAttribute("error", "Error generating report: " + e.getMessage());
         }
